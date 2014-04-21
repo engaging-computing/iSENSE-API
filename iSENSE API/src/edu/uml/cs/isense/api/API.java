@@ -431,7 +431,7 @@ public class API {
 		JSONObject requestData = new JSONObject();
 
 		try {
-			requestData.put("contributor_key", conKey);
+			requestData.put("contribution_key", conKey);
 			requestData.put("contributor_name", conName);
 			requestData.put("data", data);
 			String reqResult = makeRequest(
@@ -625,7 +625,7 @@ public class API {
 					"upload",
 					new FileBody(mediaToUpload, URLConnection
 							.guessContentTypeFromName(mediaToUpload.getName())));
-			entity.addPart("contributor_key", new StringBody(conKey));
+			entity.addPart("contribution_key", new StringBody(conKey));
 			entity.addPart("contributor_name", new StringBody(conName));
 			entity.addPart("type", new StringBody((ttype == TargetType.PROJECT) ? "project" : "data_set"));
 			entity.addPart("id", new StringBody(""+projectId));
