@@ -823,7 +823,8 @@ public class API {
 					if (reformatted.has(currKey)) {
 						currArray = reformatted.getJSONArray(currKey);
 					}
-					currArray.put(innermost.getInt(currKey));
+					currArray.put(innermost.get(currKey));
+					//currArray.put(innermost.getInt(currKey));
 					reformatted.put(currKey, currArray);
 				}
 			}
