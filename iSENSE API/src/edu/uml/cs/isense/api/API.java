@@ -417,6 +417,8 @@ public class API {
 	 * 
 	 * @param projectId
 	 *            The ID of the project to upload data to
+   * @param title
+   *             The data set title.
 	 * @param data
 	 *            The data to be uploaded. Must be in column-major format to
 	 *            upload correctly
@@ -427,10 +429,11 @@ public class API {
 	 * @return The integer ID of the newly uploaded dataset, or -1 if upload
 	 *         fails
 	 */
-	public int uploadDataSet(int projectId, JSONObject data, String conKey, String conName) {
+	public int uploadDataSet(int projectId, String title, JSONObject data, String conKey, String conName) {
 		JSONObject requestData = new JSONObject();
 
 		try {
+		  requestData.put("title", title);
 			requestData.put("contribution_key", conKey);
 			requestData.put("contributor_name", conName);
 			requestData.put("data", data);
@@ -439,11 +442,11 @@ public class API {
 					"projects/" + projectId + "/jsonDataUpload", "", "POST",
 					requestData);
 			JSONObject jobj = new JSONObject(reqResult);
+			System.out.println(jobj.toString());
 			return jobj.getInt("id");
 		} catch (Exception e) {
-			e.printStackTrace();
+		  return -1;
 		}
-		return -1;
 	}
 
 	/**
@@ -823,7 +826,8 @@ public class API {
 					if (reformatted.has(currKey)) {
 						currArray = reformatted.getJSONArray(currKey);
 					}
-					currArray.put(innermost.getInt(currKey));
+					currArray.put(innermost.get(currKey));
+					//currArray.put(innermost.getInt(currKey));
 					reformatted.put(currKey, currArray);
 				}
 			}
