@@ -442,11 +442,11 @@ public class API {
 					"projects/" + projectId + "/jsonDataUpload", "", "POST",
 					requestData);
 			JSONObject jobj = new JSONObject(reqResult);
+			System.out.println(jobj.toString());
 			return jobj.getInt("id");
 		} catch (Exception e) {
-			e.printStackTrace();
+		  return -1;
 		}
-		return -1;
 	}
 
 	/**
