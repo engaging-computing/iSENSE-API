@@ -22,7 +22,6 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.uml.cs.isense.objects.RDataSet;
@@ -271,6 +270,25 @@ public class API {
 		}
 		return -1;
 	}
+	
+	/**
+	 * Deletes a project on iSENSE. Logged in user must have permission on the
+	 * site to do this
+	 * 
+	 * @param projectId
+	 *            The ID of the project on iSENSE to be deleted
+	 * @return 1 if the deletion succeeds.
+	 */
+	public int deleteProject(int projectId) {
+		try {
+			makeRequest(baseURL, "projects/" + projectId, "authenticity_token="
+					+ URLEncoder.encode(authToken, "UTF-8"), "DELETE", null);
+			return 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
 
 	/**
 	 * Gets all of the fields associated with a project.
@@ -328,7 +346,6 @@ public class API {
 
 			result.ds_id = j.getInt("id");
 			result.name = j.getString("name");
-			result.hidden = j.getBoolean("hidden");
 			result.url = j.getString("url");
 			result.timecreated = j.getString("createdAt");
 			result.fieldCount = j.getInt("fieldCount");
@@ -479,7 +496,7 @@ public class API {
 	/**
 	 * Append new rows of data to the end of an existing data set ** This
 	 * currently works for horrible reasons regarding how the website handles
-	 * edit data sets ** Will fix hopefully --J TODO
+	 * edit data sets ** Will fix hopefully --J
 	 * 
 	 * @param dataSetId
 	 *            The ID of the data set to append to
@@ -536,7 +553,6 @@ public class API {
 
 		return true;
 	}
-
 	/**
 	 * Uploads a file to the media section of a project while logged in
 	 * 

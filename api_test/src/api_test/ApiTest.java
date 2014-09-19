@@ -45,7 +45,6 @@ public class ApiTest {
 	JPanel buttons;
 	JPanel results;
 
-
 	/**
 	 * Launch the application.
 	 */
@@ -63,14 +62,14 @@ public class ApiTest {
 	}
 
 	/**
-	 * Create the application.
+	 * Constructor for APITest window
 	 */
 	public ApiTest() {
 		initialize();
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Initialize the contents of the JFrame (The window).
 	 */
 	private void initialize() {
 		//initialize api object
@@ -156,52 +155,100 @@ public class ApiTest {
 		        });
 	}
 	
+	/**
+	 * Tests logging in. Logs in with email- mobile.fake@example.com password- mobile
+	 * @author bobby
+	 *
+	 */
 	 class LoginTask extends SwingWorker {
-	        /**
-	         * @throws Exception
-	         */
-	        protected Object doInBackground() throws Exception {				
-	        	RPerson person = api.createSession("mobile.fake@example.com", "mobile");
+        /**
+         * @throws Exception
+         */
+        protected Object doInBackground() throws Exception {				
+        	RPerson person = api.createSession("mobile.fake@example.com", "mobile");
 
-    	    	boolean success = (person != null);
-    	    	System.out.print(success);
-    	    	
-    	    	//Runs on ui thread
-	        	SwingUtilities.invokeLater(new Runnable() {
-	        	    public void run() {
-    					JLabel status = new JLabel();
-    					
-	    				if(success) {
-	    					status.setText("\nLogin successful.");
-							status.setAlignmentX(results.CENTER_ALIGNMENT);
-							status.setForeground(Color.green);
-							results.add(status, 0);
-							frame.revalidate();
-	    					new CreateProjectTask().execute();
-	    				} else {
-	    					status.setText("\nLogin failed.");
-							status.setAlignmentX(results.CENTER_ALIGNMENT);
-							status.setForeground(Color.red);
-							results.add(status, 0);
-							frame.revalidate();
-	    				}
-	    			
-	        	    }
-	        	  });
-				return success;
+	    	boolean success = (person != null);
+	    	System.out.print(success);
+	    	
+	    	//Runs on ui thread
+        	SwingUtilities.invokeLater(new Runnable() {
+        	    public void run() {
+					JLabel status = new JLabel();
+					
+    				if(success) {
+    					status.setText("\nLogin successful.");
+						status.setAlignmentX(results.CENTER_ALIGNMENT);
+						status.setForeground(Color.green);
+						results.add(status, 0);
+						frame.revalidate();
+    				} else {
+    					status.setText("\nLogin failed.");
+						status.setAlignmentX(results.CENTER_ALIGNMENT);
+						status.setForeground(Color.red);
+						results.add(status, 0);
+						frame.revalidate();
+    				}
+					new CreateProjectTask().execute();
+        	    }
+        	  });
+			return success;
 	    }
 	 }
 	        
-        class LogoutTask extends SwingWorker {
+	 /**
+	 *  Test Creating a Project 
+	 * @author bobby
+	 *
+	 */
+	 class CreateProjectTask extends SwingWorker {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
-				api.deleteSession();
+				ArrayList<RProjectField> fields = new ArrayList<RProjectField>();
+				
+				RProjectField time = new RProjectField();
+				time.type = RProjectField.TYPE_TIMESTAMP;
+				time.name = "Time";
+				fields.add(time);
+				
+				
+				RProjectField amount = new RProjectField();
+				amount.type = RProjectField.TYPE_NUMBER;
+				amount.name = "Amount";
+				amount.unit = "units";
+				fields.add(amount);
+				
+				projectId = api.createProject("Test Project", fields);
+				JLabel status = new JLabel();
+
+				if(projectId == -1) {
+					status.setText("Create project fail.");
+					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setForeground(Color.red);
+
+					results.add(status, 0);
+					frame.revalidate();
+				} else {
+					status.setText("Create project Success.");
+					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setForeground(Color.green);
+
+					results.add(status, 0);
+					frame.revalidate();
+				}
+				new ProjectsTask().execute();
+				
 				return null;
-		    }
-        }
-        
+
+	        }
+  		}
+       
+       /**
+        *  Tests api call to get a list of the projects on isense
+        * @author bobby
+        *
+        */
         class ProjectsTask extends SwingWorker {
 	        /**
 	         * @throws Exception
@@ -241,35 +288,38 @@ public class ApiTest {
 					results.add(status, 0);
 					frame.revalidate();
 				}
+				
+				new GetFieldIdsTask().execute();
+				
 				return null;
 	        }
         }
        
 	 
-	 class AppendTask extends SwingWorker {
+	
+	
+  
+	 	/**
+	 	 * Tests api call to get fields for a specific project
+	 	 * @author bobby
+	 	 *
+	 	 */
+	 	class GetFieldIdsTask extends SwingWorker {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
-	        	JSONObject toAppend = new JSONObject();
-	        	
-	        	//TODO 0 1 and 2 are not correct field id's
-				try {
-					toAppend.put("0", new JSONArray().put("2013/08/05 10:50:20"));
-					toAppend.put("1", new JSONArray().put("119"));
-					toAppend.put("2", new JSONArray().put("120"));
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-				api.appendDataSetData(20, toAppend);
-				
-			//	new DeleteProjectTask().execute(); TODO
-		        return null;
+	    	
+				new UploadTask().execute();
+				return null;
 		    }
-     }
-	 
-	 
+	 	}
 	    
+	 	/**
+	 	 * Tests uploading data to a project
+	 	 * @author bobby
+	 	 *
+	 	 */
      class UploadTask extends SwingWorker {
 	        /**
 	         * @throws Exception
@@ -305,102 +355,145 @@ public class ApiTest {
 					frame.revalidate();
 				}
 
-				//TODO
-//				new DeleteProjectTask().execute(); 
-	        	
+				new AppendTask().execute();
 	        	return null;
 		    }
      }
-     
-     class ProjMediaTask extends SwingWorker {
+     /**
+      * Tests appending to a dataset
+      * @author bobby
+      *
+      */
+     class AppendTask extends SwingWorker {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
-				return null;
-	        	//TODO fix
-//				api.uploadMedia(7, new File(params[0]), API.TargetType.PROJECT);
-				//new AppendTask().execute(); TODO
-
-		    }
-     }
-		
-     class DSMediaTask extends SwingWorker {
-	        /**
-	         * @throws Exception
-	         */
-	        protected Object doInBackground() throws Exception {
-				return null;
-	        	//TODO api upload media
-//				api.uploadMedia(42, new File(params[0]), API.TargetType.DATA_SET);
-
-		    }
-     }
-		
-     
-     class CreateProjectTask extends SwingWorker {
-	        /**
-	         * @throws Exception
-	         */
-	        protected Object doInBackground() throws Exception {
-				ArrayList<RProjectField> fields = new ArrayList<RProjectField>();
+	        	JSONObject toAppend = new JSONObject();
+	        	
+	        	//TODO 0 1 and 2 are not correct field id's
+				try {
+					toAppend.put("0", new JSONArray().put("2013/08/05 10:50:20"));
+					toAppend.put("1", new JSONArray().put("119"));
+					toAppend.put("2", new JSONArray().put("120"));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				boolean success = api.appendDataSetData(20, toAppend);
 				
-				RProjectField time = new RProjectField();
-				time.type = RProjectField.TYPE_TIMESTAMP;
-				time.name = "Time";
-				fields.add(time);
-				
-				
-				RProjectField amount = new RProjectField();
-				amount.type = RProjectField.TYPE_NUMBER;
-				amount.name = "Amount";
-				amount.unit = "units";
-				fields.add(amount);
-				
-				projectId = api.createProject("Test Project", fields);
 				JLabel status = new JLabel();
-
-				if(projectId == -1) {
-					status.setText("Create project fail.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
-					status.setForeground(Color.red);
-
-					results.add(status, 0);
-					frame.revalidate();
-				} else {
-					status.setText("Create project Success.");
+				if(success) {
+					status.setText("Append data set success.");
 					status.setAlignmentX(results.CENTER_ALIGNMENT);
 					status.setForeground(Color.green);
 
 					results.add(status, 0);
 					frame.revalidate();
-					new UploadTask().execute();
+				} else {
+					status.setText("Append data set fail.");
+					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setForeground(Color.red);
 
-				}
+					results.add(status, 0);
+					frame.revalidate();
+				} 
+				
+				new ProjMediaTask().execute();
+				
+		        return null;
+		    }
+  }
+     /**
+      * Tests uploading media
+      * @author bobby
+      *
+      */
+     class ProjMediaTask extends SwingWorker {
+	        /**
+	         * @throws Exception
+	         */
+	        protected Object doInBackground() throws Exception {
+	        	//TODO fix
+//				api.uploadMedia(7, new File(params[0]), API.TargetType.PROJECT);
+
+				new DSMediaTask().execute();
 				
 				return null;
+		    }
+     }
+	/**
+	 * Tests uploading media to a dataset
+	 * @author bobby
+	 *
+	 */
+     class DSMediaTask extends SwingWorker {
+	        /**
+	         * @throws Exception
+	         */
+	        protected Object doInBackground() throws Exception {
+	        	//TODO api upload media
+//				api.uploadMedia(42, new File(params[0]), API.TargetType.DATA_SET);
 
-	        }
-  }
-		//TODO delete project api call
-//		class DeleteProjectTask extends SwingWorker {
-//	        /**
-//	         * @throws Exception
-//	         */
-//	        protected Object doInBackground() throws Exception {
-//				
-//				int proj = api.deleteProject(projectId);
-//				
-//				if(proj == -1) {
-//					status.setText(status.getText() + "Delete project failed.");
-//				} else {
-//					status.setText(status.getText() + "Delete project successful.");
-//				}
-//				
-//				return null;
-//		    }
-//		}
-//		
+//	        	new DeleteProjectTask().execute();
+	        	new LogoutTask().execute();
+	        	
+				return null;
+		    }
+     }
+	
+     //TODO Delete Project api call on website does not exist as of right now 9/18/14
+     /**
+      * Tests Deleing a project
+      * @author bobby
+      *
+      */
+	 class DeleteProjectTask extends SwingWorker {
+        /**
+         * @throws Exception
+         */
+        protected Object doInBackground() throws Exception {
+    		//TODO delete project api call
+
+			int success = api.deleteProject(projectId);
+			JLabel status = new JLabel();
+
+			if(success == 1) {
+				status.setText("Delete project sucess.");
+				status.setAlignmentX(results.CENTER_ALIGNMENT);
+				status.setForeground(Color.green);
+
+				results.add(status, 0);
+				frame.revalidate();
+			} else {
+				status.setText("Delete project fail.");
+				status.setAlignmentX(results.CENTER_ALIGNMENT);
+				status.setForeground(Color.red);
+
+				results.add(status, 0);
+				frame.revalidate();
+			}
+			
+			new LogoutTask().execute();
+			
+			return null;
+	    }
+	}
+	 
+	 /**
+	 * Tests logging out
+	 * @author bobby
+	 *
+	 */
+     class LogoutTask extends SwingWorker {
+	        /**
+	         * @throws Exception
+	         */
+	        protected Object doInBackground() throws Exception {
+				api.deleteSession();
+				return null;
+		    }
+     }
+		
 }
 
 	
