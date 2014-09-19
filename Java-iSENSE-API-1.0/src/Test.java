@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import org.junit.BeforeClass;
 
 import edu.uml.cs.isense.api.API;
+import edu.uml.cs.isense.api.UploadInfo;
 import edu.uml.cs.isense.objects.RDataSet;
 import edu.uml.cs.isense.objects.RPerson;
 import edu.uml.cs.isense.objects.RProject;
@@ -61,9 +62,9 @@ public class Test {
 			JSONObject data = new JSONObject();
 			long fieldId = api.getProjectFields(pid).get(0).field_id;
 			data.put(""+fieldId, new JSONArray().put(5).put(6).put(7));
-			int dsid = api.uploadDataSet(pid, data, "Test Dataset");
+			UploadInfo info = api.uploadDataSet(pid, data, "Test Dataset");
 			//assertNotEquals(dsid, -1);
-			assertNotNull(api.getDataSet(dsid));
+			assertNotNull(api.getDataSet(info.dataSetId));
 		}
 	}
 	
