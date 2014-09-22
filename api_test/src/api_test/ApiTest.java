@@ -1,11 +1,14 @@
 package api_test;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JFrame;
 
@@ -44,6 +47,10 @@ public class ApiTest {
 	int projectId;
 	JPanel buttons;
 	JPanel results;
+	
+	UploadInfo dataSetInfo;
+	
+	ArrayList<RProjectField> fields;
 
 	/**
 	 * Launch the application.
@@ -124,35 +131,42 @@ public class ApiTest {
 		
 		
 		//Called dev button is clicked
-				dev.addActionListener(new ActionListener() {
-					@Override
-						public void actionPerformed(ActionEvent e) {
-							api.useDev(true);
-							JLabel status = new JLabel();
-							status.setText("Starting tests on rsense-dev...");
-							status.setAlignmentX(results.CENTER_ALIGNMENT);
-							results.add(status, 0);
-							
-							frame.revalidate();
-							new LoginTask().execute();
-						}
-			        });      
-						
+		dev.addActionListener(new ActionListener() {
+			@Override
+				public void actionPerformed(ActionEvent e) {
+					api.useDev(true);
+					JLabel status = new JLabel();
+					status.setText("Starting tests on rsense-dev...");
+					Font font = status.getFont();
+					Font bold = new Font(font.getFontName(), Font.BOLD, font.getSize());
+					status.setFont(bold);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				
-				//Called when live button is clicked
-				live.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						api.useDev(false);
-						JLabel status = new JLabel();
-						status.setText("Starting tests on isenseproject...");
-						status.setAlignmentX(results.CENTER_ALIGNMENT);
-						results.add(status, 0);
-						
-						frame.revalidate();
-						//new LoginTask().execute();
-					}
-		        });
+					results.add(status);
+					
+					frame.revalidate();
+					new LoginTask().execute();
+				}
+	        });      
+				
+		
+		//Called when live button is clicked
+		live.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				api.useDev(false);
+				JLabel status = new JLabel();
+				status.setText("Starting tests on isenseproject...");
+				Font font = status.getFont();
+				Font bold = new Font(font.getFontName(), Font.BOLD, font.getSize());
+				status.setFont(bold);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				results.add(status);
+				
+				frame.revalidate();
+				new LoginTask().execute();
+			}
+        });
 	}
 	
 	/**
@@ -160,7 +174,7 @@ public class ApiTest {
 	 * @author bobby
 	 *
 	 */
-	 class LoginTask extends SwingWorker {
+	 class LoginTask extends SwingWorker<Object, Object> {
         /**
          * @throws Exception
          */
@@ -170,22 +184,21 @@ public class ApiTest {
 	    	boolean success = (person != null);
 	    	System.out.print(success);
 	    	
-	    	//Runs on ui thread
         	SwingUtilities.invokeLater(new Runnable() {
         	    public void run() {
 					JLabel status = new JLabel();
 					
     				if(success) {
     					status.setText("\nLogin successful.");
-						status.setAlignmentX(results.CENTER_ALIGNMENT);
+						status.setAlignmentX(Component.CENTER_ALIGNMENT);
 						status.setForeground(Color.green);
-						results.add(status, 0);
+						results.add(status);
 						frame.revalidate();
     				} else {
     					status.setText("\nLogin failed.");
-						status.setAlignmentX(results.CENTER_ALIGNMENT);
+						status.setAlignmentX(Component.CENTER_ALIGNMENT);
 						status.setForeground(Color.red);
-						results.add(status, 0);
+						results.add(status);
 						frame.revalidate();
     				}
 					new CreateProjectTask().execute();
@@ -200,7 +213,7 @@ public class ApiTest {
 	 * @author bobby
 	 *
 	 */
-	 class CreateProjectTask extends SwingWorker {
+	 class CreateProjectTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
@@ -211,7 +224,6 @@ public class ApiTest {
 				time.type = RProjectField.TYPE_TIMESTAMP;
 				time.name = "Time";
 				fields.add(time);
-				
 				
 				RProjectField amount = new RProjectField();
 				amount.type = RProjectField.TYPE_NUMBER;
@@ -224,17 +236,17 @@ public class ApiTest {
 
 				if(projectId == -1) {
 					status.setText("Create project fail.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.red);
 
-					results.add(status, 0);
+					results.add(status);
 					frame.revalidate();
 				} else {
 					status.setText("Create project Success.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.green);
 
-					results.add(status, 0);
+					results.add(status);
 					frame.revalidate();
 				}
 				new ProjectsTask().execute();
@@ -249,7 +261,7 @@ public class ApiTest {
         * @author bobby
         *
         */
-        class ProjectsTask extends SwingWorker {
+        class ProjectsTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
@@ -261,31 +273,46 @@ public class ApiTest {
 					rpfs.add(api.getProjectFields(rp.project_id));
 				}	
 				
+				JLabel projects = new JLabel();
+				projects.setText("Attempting to get 2 projects and their fields");
+				projects.setAlignmentX(Component.CENTER_ALIGNMENT);
+				results.add(projects);
+				frame.revalidate();
+				
 				for(RProject p : rps) {
-					JLabel status = new JLabel();
-					status.setText(status.getText() + "\n" + p.name + "\n");
-					
+					JLabel project = new JLabel();
+					project.setText("Project name: " + p.name);
+					project.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+					results.add(project);
+					results.revalidate();
+
 					if(rpfs.size() > 0) {
 						for(RProjectField rp : rpfs.remove(0)) {
-							status.setText(status.getText() + " - "+rp.name+"\n");
+							JLabel field = new JLabel();
+							field.setText("Field name: " + rp.name);
+							field.setAlignmentX(Component.CENTER_ALIGNMENT);
+							results.add(field);
+							results.revalidate();
 						}
 					}
 				}
-				
-				JLabel status = new JLabel();
+			
 				if(rps.size() <= 2) {
-					status.setText("Get (at most) 2 Projects failed");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
-					status.setForeground(Color.red);
-
-					results.add(status, 0);
-					frame.revalidate();
-				} else {
+					JLabel status = new JLabel();
 					status.setText("Get (at most) 2 Projects successful");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.green);
 
-					results.add(status, 0);
+					results.add(status);
+					frame.revalidate();
+				} else {
+					JLabel status = new JLabel();
+					status.setText("Get (at most) 2 Projects failed");
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
+					status.setForeground(Color.red);
+
+					results.add(status);
 					frame.revalidate();
 				}
 				
@@ -293,23 +320,19 @@ public class ApiTest {
 				
 				return null;
 	        }
-        }
-       
-	 
-	
-	
+        }	
   
 	 	/**
 	 	 * Tests api call to get fields for a specific project
 	 	 * @author bobby
 	 	 *
 	 	 */
-	 	class GetFieldIdsTask extends SwingWorker {
+	 	class GetFieldIdsTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
-	    	
+	        	fields = api.getProjectFields(projectId);
 				new UploadTask().execute();
 				return null;
 		    }
@@ -320,81 +343,84 @@ public class ApiTest {
 	 	 * @author bobby
 	 	 *
 	 	 */
-     class UploadTask extends SwingWorker {
+     class UploadTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
 	        	JSONObject j = new JSONObject();
-	        	//TODO not 1 and 0
+	        	String field1 = Long.toString(fields.get(0).field_id);
+	        	String field2 = Long.toString(fields.get(1).field_id);
 				try {
-					j.put("1", new JSONArray().put("45"));
-					j.put("0", new JSONArray().put("2013/08/02 09:50:01"));
+					j.put(field1, new JSONArray().put("2013/08/02 09:50:01"));
+					j.put(field2, new JSONArray().put("45"));
 				} catch (JSONException e) {
 					e.printStackTrace();
 					UploadInfo info = new UploadInfo();
 					return info;
 				}
 				
-				UploadInfo info = api.uploadDataSet(projectId, j, "mobile upload test");
+				dataSetInfo = api.uploadDataSet(projectId, j, "mobile upload test");
 				
 				JLabel status = new JLabel();
-				if(info.dataSetId == -1) {
+				if(dataSetInfo.dataSetId == -1) {
 					status.setText("Upload data set fail.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.red);
 
-					results.add(status, 0);
+					results.add(status);
 					frame.revalidate();
 				} else {
 					status.setText("Upload data set success.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.green);
 
-					results.add(status, 0);
+					results.add(status);
 					frame.revalidate();
 				}
-
 				new AppendTask().execute();
 	        	return null;
 		    }
      }
+     
      /**
       * Tests appending to a dataset
       * @author bobby
       *
       */
-     class AppendTask extends SwingWorker {
+     class AppendTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
 	        	JSONObject toAppend = new JSONObject();
 	        	
-	        	//TODO 0 1 and 2 are not correct field id's
+	        	String field1 = Long.toString(fields.get(0).field_id);
+	        	String field2 = Long.toString(fields.get(1).field_id);
+
 				try {
-					toAppend.put("0", new JSONArray().put("2013/08/05 10:50:20"));
-					toAppend.put("1", new JSONArray().put("119"));
-					toAppend.put("2", new JSONArray().put("120"));
+					toAppend.put(field1, new JSONArray().put("2013/08/05 10:50:20"));
+					toAppend.put(field2, new JSONArray().put("119"));
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				boolean success = api.appendDataSetData(20, toAppend);
+				
+				boolean success = api.appendDataSetData(dataSetInfo.dataSetId, toAppend);
 				
 				JLabel status = new JLabel();
 				if(success) {
 					status.setText("Append data set success.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.green);
 
-					results.add(status, 0);
+					results.add(status);
 					frame.revalidate();
 				} else {
 					status.setText("Append data set fail.");
-					status.setAlignmentX(results.CENTER_ALIGNMENT);
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
 					status.setForeground(Color.red);
 
-					results.add(status, 0);
+					results.add(status);
 					frame.revalidate();
 				} 
 				
@@ -408,13 +434,31 @@ public class ApiTest {
       * @author bobby
       *
       */
-     class ProjMediaTask extends SwingWorker {
+     class ProjMediaTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
-	        	//TODO fix
-//				api.uploadMedia(7, new File(params[0]), API.TargetType.PROJECT);
+				UploadInfo info = api.uploadMedia(projectId, new File("test.jpg"), API.TargetType.PROJECT);
+				
+				
+				JLabel status = new JLabel();
+				if(info.mediaId != -1) {
+					status.setText("Upload media to project success.");
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
+					status.setForeground(Color.green);
+
+					results.add(status);
+					frame.revalidate();
+				} else {
+					status.setText("Upload media to project fail.");
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
+					status.setForeground(Color.red);
+
+					results.add(status);
+					frame.revalidate();
+				} 
+				
 
 				new DSMediaTask().execute();
 				
@@ -422,54 +466,68 @@ public class ApiTest {
 		    }
      }
 	/**
-	 * Tests uploading media to a dataset
+	 * Tests uploading media to a data set
 	 * @author bobby
 	 *
 	 */
-     class DSMediaTask extends SwingWorker {
+     class DSMediaTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
-	        	//TODO api upload media
-//				api.uploadMedia(42, new File(params[0]), API.TargetType.DATA_SET);
+				UploadInfo info = api.uploadMedia(dataSetInfo.dataSetId, new File("test.jpg"), API.TargetType.DATA_SET);
+				
+				JLabel status = new JLabel();
+				if(info.mediaId != -1) {
+					status.setText("Upload media to data set successful.");
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
+					status.setForeground(Color.green);
 
-//	        	new DeleteProjectTask().execute();
+					results.add(status);
+					frame.revalidate();
+				} else {
+					status.setText("Upload media to data set failed.");
+					status.setAlignmentX(Component.CENTER_ALIGNMENT);
+					status.setForeground(Color.red);
+
+					results.add(status);
+					frame.revalidate();
+				} 
+				
+
 	        	new LogoutTask().execute();
-	        	
 				return null;
 		    }
      }
 	
      //TODO Delete Project api call on website does not exist as of right now 9/18/14
      /**
-      * Tests Deleing a project
+      * Tests Deleting a project
       * @author bobby
       *
       */
-	 class DeleteProjectTask extends SwingWorker {
+	 class DeleteProjectTask extends SwingWorker<Object, Object> {
         /**
          * @throws Exception
          */
         protected Object doInBackground() throws Exception {
-    		//TODO delete project api call
 
-			int success = api.deleteProject(projectId);
+        	int success = api.deleteProject(projectId);
 			JLabel status = new JLabel();
 
 			if(success == 1) {
 				status.setText("Delete project sucess.");
-				status.setAlignmentX(results.CENTER_ALIGNMENT);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
 
-				results.add(status, 0);
+				results.add(status);
 				frame.revalidate();
 			} else {
 				status.setText("Delete project fail.");
-				status.setAlignmentX(results.CENTER_ALIGNMENT);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
-				results.add(status, 0);
+				results.add(status);
 				frame.revalidate();
 			}
 			
@@ -484,18 +542,24 @@ public class ApiTest {
 	 * @author bobby
 	 *
 	 */
-     class LogoutTask extends SwingWorker {
+     class LogoutTask extends SwingWorker<Object, Object> {
 	        /**
 	         * @throws Exception
 	         */
 	        protected Object doInBackground() throws Exception {
 				api.deleteSession();
+				
+				JLabel status = new JLabel();
+				Font font = status.getFont();
+				Font bold = new Font(font.getFontName(), Font.BOLD, font.getSize());
+				status.setFont(bold);
+				status.setText("Testing Complete.");
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				results.add(status);
+				frame.revalidate();
+				
 				return null;
 		    }
      }
 		
 }
-
-	
-
-
