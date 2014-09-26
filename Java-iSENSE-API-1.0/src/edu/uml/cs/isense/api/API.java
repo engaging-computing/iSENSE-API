@@ -548,10 +548,7 @@ public class API {
 							+ URLEncoder.encode(authToken, "UTF-8"), "POST",
 					requestData);
 
-			JSONObject resultObject = new JSONObject(result); // this line will
-																// throw an
-																// exception if
-																// it
+			JSONObject resultObject = new JSONObject(result);
 
 			// if status is not 200 return false
 			if (200 != resultObject.getInt("status")) {
