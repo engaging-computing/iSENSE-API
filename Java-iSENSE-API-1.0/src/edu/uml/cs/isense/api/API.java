@@ -469,12 +469,8 @@ public class API {
 			requestData.put("contribution_key", conKey);
 			requestData.put("contributor_name", conName);
 			requestData.put("data", data);
-			requestData.put("title", dataName + appendedTimeStamp()); // dataset
-																		// name
-																		// is
-																		// conName
-																		// +
-																		// timestamp
+			requestData.put("title", dataName + appendedTimeStamp());
+
 			reqResult = makeRequest(baseURL, "projects/" + projectId
 					+ "/jsonDataUpload", "", "POST", requestData);
 			JSONObject jobj = new JSONObject(reqResult);
