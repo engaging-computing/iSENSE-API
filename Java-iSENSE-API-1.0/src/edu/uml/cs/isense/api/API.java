@@ -474,6 +474,7 @@ public class API {
 				}
 			}
 		}
+		info.success = false;
 		info.dataSetId = -1;
 		return info;
 	}
@@ -527,6 +528,7 @@ public class API {
 				}
 			}
 		}
+		info.success = false;
 		info.dataSetId = -1;
 		return info;
 	}
@@ -592,15 +594,25 @@ public class API {
 				info.errorMessage = jobj.getString("error");
 				info.success = false;
 				return info;
+			} else {
+				info.success = true;
+				return info;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			JSONObject jobj = new JSONObject(result);
-			info.errorMessage = jobj.getString("error");
-			info.success = false;
-			return info;
-		}
 
+		} catch (Exception e) {
+			try {
+				JSONObject jobj = new JSONObject(result);
+				info.errorMessage = jobj.getString("msg");
+			} catch (Exception e2) {
+				try {
+					JSONObject jobj = new JSONObject(result);
+					info.errorMessage = jobj.getString("error");
+				} catch (Exception e3) {
+					info.errorMessage = result;
+				}
+			}
+		}
+		info.success = false;
 		return info;
 	}
 
@@ -803,6 +815,7 @@ public class API {
 			e.printStackTrace();
 		}
 		info.mediaId = -1;
+		info.success = false;
 		return info;
 	}
 
