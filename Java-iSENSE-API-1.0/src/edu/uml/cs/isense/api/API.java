@@ -271,8 +271,7 @@ public class API {
 				JSONObject fieldObj = new JSONObject(fieldResult);
 				// Failed to add field to project, return failure and error
 				// message
-				if (fieldObj.getInt("status") == 200) {
-					System.out.print(fieldObj.getInt("status"));
+				if (fieldObj.getInt("id") != -1) {
 					try {
 						info.errorMessage = fieldObj.getString("msg");
 						info.success = false;
@@ -659,6 +658,7 @@ public class API {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				info.mediaId = -1;
+				info.success = false;
 				info.errorMessage = "No Connection";
 				return info;
 			}
@@ -684,11 +684,13 @@ public class API {
 					JSONObject jobj = new JSONObject(output);
 					info.errorMessage = jobj.getString("msg");
 					info.mediaId = -1;
+					info.success = false;
 					return info;
 				} catch (Exception e2) {
 					JSONObject jobj = new JSONObject(output);
 					info.errorMessage = jobj.getString("error");
 					info.mediaId = -1;
+					info.success = false;
 					return info;
 				}
 			} finally {
@@ -699,6 +701,7 @@ public class API {
 			e.printStackTrace();
 		}
 		info.mediaId = -1;
+		info.success = false;
 		return info;
 	}
 

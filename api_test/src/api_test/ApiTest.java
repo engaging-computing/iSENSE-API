@@ -237,6 +237,7 @@ public class ApiTest {
 			fields.add(amount);
 
 			UploadInfo info = api.createProject("Test Project", fields);
+			projectId = info.projectId;
 			JLabel status = new JLabel();
 
 			if (info.success) {
@@ -290,11 +291,25 @@ public class ApiTest {
 			frame.revalidate();
 
 			for (RProject p : rps) {
+				/* Project Name */
 				JLabel project = new JLabel();
 				project.setText("Project name: " + p.name);
 				project.setAlignmentX(Component.CENTER_ALIGNMENT);
-
 				results.add(project);
+				results.revalidate();
+
+				/* Project Id */
+				JLabel projectIdLabel = new JLabel();
+				projectIdLabel.setText("Project Id: " + p.project_id);
+				projectIdLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+				results.add(projectIdLabel);
+				results.revalidate();
+
+				/* Project Id */
+				JLabel projectUrlLabel = new JLabel();
+				projectUrlLabel.setText("Project Url: " + p.url);
+				projectUrlLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+				results.add(projectUrlLabel);
 				results.revalidate();
 
 				if (rpfs.size() > 0) {
@@ -376,19 +391,19 @@ public class ApiTest {
 			dataSetInfo = api.uploadDataSet(projectId, j, "mobile upload test");
 
 			JLabel status = new JLabel();
-			if (dataSetInfo.dataSetId == -1) {
-				status.setText("Upload data set fail. Error Message: "
-						+ dataSetInfo.errorMessage);
-				status.setAlignmentX(Component.CENTER_ALIGNMENT);
-				status.setForeground(Color.red);
-
-				results.add(status);
-				frame.revalidate();
-			} else {
+			if (dataSetInfo.success) {
 				status.setText("Upload data set success. ID = "
 						+ dataSetInfo.dataSetId);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
+
+				results.add(status);
+				frame.revalidate();
+			} else {
+				status.setText("Upload data set fail. Error Message: "
+						+ dataSetInfo.errorMessage);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.red);
 
 				results.add(status);
 				frame.revalidate();
@@ -464,8 +479,9 @@ public class ApiTest {
 					API.TargetType.PROJECT);
 
 			JLabel status = new JLabel();
-			if (info.mediaId != -1) {
-				status.setText("Upload media to project success.");
+			if (info.success) {
+				status.setText("Upload media to project success. ID: "
+						+ info.mediaId);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
 
@@ -502,8 +518,9 @@ public class ApiTest {
 					"test.jpg"), API.TargetType.DATA_SET);
 
 			JLabel status = new JLabel();
-			if (info.mediaId != -1) {
-				status.setText("Upload media to data set successful.");
+			if (info.success) {
+				status.setText("Upload media to data set successful. ID: "
+						+ info.mediaId);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
 
