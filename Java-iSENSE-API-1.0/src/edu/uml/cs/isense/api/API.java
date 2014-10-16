@@ -96,8 +96,9 @@ public class API {
 	 *            The password of the user to log in as
 	 */
 	public RPerson createSession(String p_email, String p_password) {
+		String reqResult = "";
 		try {
-			String reqResult = makeRequest(baseURL, "users/myInfo", "email="
+			reqResult = makeRequest(baseURL, "users/myInfo", "email="
 					+ URLEncoder.encode(p_email, "UTF-8") + "&password="
 					+ URLEncoder.encode(p_password, "UTF-8"), "GET", null);
 			JSONObject j = new JSONObject(reqResult);
@@ -108,13 +109,34 @@ public class API {
 				you.name = j.getString("name");
 				you.gravatar = j.getString("gravatar");
 				currentUser = you;
+				you.successfulLogin = true;
 				return you;
 			} else {
-				return null;
+				// not a valid person so get error message
+				RPerson you = new RPerson();
+				JSONObject jobj = new JSONObject(reqResult);
+				you.serverErrorMessage = jobj.getString("msg");
+				return you;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			// Something went wrong so create a new RPerson object with
+			// default values and get the error message from the server
+			try {
+				RPerson you = new RPerson();
+				JSONObject jobj = new JSONObject(reqResult);
+				you.serverErrorMessage = jobj.getString("msg");
+				return you;
+			} catch (Exception e2) {
+				try {
+					RPerson you = new RPerson();
+					JSONObject jobj = new JSONObject(reqResult);
+					you.serverErrorMessage = jobj.getString("error");
+					return you;
+				} catch (Exception e3) {
+					RPerson you = new RPerson();
+					return you;
+				}
+			}
 		}
 	}
 
@@ -271,7 +293,7 @@ public class API {
 				JSONObject fieldObj = new JSONObject(fieldResult);
 				// Failed to add field to project, return failure and error
 				// message
-				if (fieldObj.getInt("id") != -1) {
+				if (fieldObj.getInt("id") == -1) {
 					try {
 						info.errorMessage = fieldObj.getString("msg");
 						info.success = false;

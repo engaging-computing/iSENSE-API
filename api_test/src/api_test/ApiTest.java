@@ -183,22 +183,20 @@ public class ApiTest {
 			RPerson person = api.createSession("mobile.fake@example.com",
 					"mobile");
 
-			boolean success = (person != null);
-			System.out.print(success);
-
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
 					JLabel status = new JLabel();
 
-					if (success) {
+					if (person.successfulLogin) {
 						status.setText("\nLogin successful.");
 						status.setAlignmentX(Component.CENTER_ALIGNMENT);
 						status.setForeground(Color.green);
 						results.add(status);
 						frame.revalidate();
 					} else {
-						status.setText("\nLogin failed. "); // TODO error
+						status.setText("\nLogin failed. "
+								+ person.serverErrorMessage);
 						status.setAlignmentX(Component.CENTER_ALIGNMENT);
 						status.setForeground(Color.red);
 						results.add(status);
@@ -207,7 +205,7 @@ public class ApiTest {
 					new CreateProjectTask().execute();
 				}
 			});
-			return success;
+			return person.successfulLogin;
 		}
 	}
 
@@ -305,7 +303,7 @@ public class ApiTest {
 				results.add(projectIdLabel);
 				results.revalidate();
 
-				/* Project Id */
+				/* Project URL */
 				JLabel projectUrlLabel = new JLabel();
 				projectUrlLabel.setText("Project Url: " + p.url);
 				projectUrlLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -540,8 +538,14 @@ public class ApiTest {
 		}
 	}
 
-	// TODO Delete Project api call on website does not exist as of right now
+	// Delete Project api call on website does not exist as of right now
 	// 9/18/14
+	/*
+	 * For testing purposes it makes sense to not delete project automatically
+	 * anyways. Api tests just verify that the result codes were successful but
+	 * they do not verify that the data ended up on the site as intended. The
+	 * testers need to verify that manually
+	 */
 	/**
 	 * Tests Deleting a project
 	 *
