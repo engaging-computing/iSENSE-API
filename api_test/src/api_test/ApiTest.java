@@ -525,15 +525,20 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			} else {
-				status.setText("Upload media to data set failed.");
+				status.setText("Upload media to data set failed. " + info.errorMessage);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
 				results.add(status);
 				frame.revalidate();
 			}
-
-			new UploadTaskWithKey().execute();
+			
+			if (api.isLive()) {
+				new LogoutTask().execute();
+			} else {
+				new UploadTaskWithKey().execute(); //hardcoded for projects on dev because I can't create a project with a key
+			}
+				
 			return null;
 		}
 	}
@@ -559,7 +564,7 @@ public class ApiTest {
 				return null;
 			}
 
-			dataSetInfo = api.uploadDataSet(978, j, "mobile upload test"); //another bad hardcode until I can create a proj with key for testing
+			dataSetInfo = api.uploadDataSet(978, j, "mobile upload test", "key", "tester"); //another bad hardcode until I can create a proj with key for testing
 
 			JLabel status = new JLabel();
 			if (dataSetInfo.success) {
@@ -571,7 +576,7 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			} else {
-				status.setText("Upload data with key fail. Error Message: "
+				status.setText("Upload data with key 'key' fail. Error Message: "
 						+ dataSetInfo.errorMessage);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
@@ -609,7 +614,7 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			} else {
-				status.setText("Upload media to project 978 with key fail.");
+				status.setText("Upload media to project 978 with key 'key' failed. Error message: " + info.errorMessage);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
@@ -648,7 +653,7 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			} else {
-				status.setText("Upload media to data set 6938 with key failed.");
+				status.setText("Upload media to data set 6938 with key 'key' failed. Error Message: " + info.errorMessage);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
