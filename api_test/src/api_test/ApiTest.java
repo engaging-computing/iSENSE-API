@@ -180,7 +180,7 @@ public class ApiTest {
 		 */
 		@Override
 		protected Object doInBackground() throws Exception {
-			RPerson person = api.createSession("mobile.fake@example.com",
+			final RPerson person = api.createSession("mobile.fake@example.com",
 					"mobile");
 
 			SwingUtilities.invokeLater(new Runnable() {
@@ -526,6 +526,129 @@ public class ApiTest {
 				frame.revalidate();
 			} else {
 				status.setText("Upload media to data set failed.");
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.red);
+
+				results.add(status);
+				frame.revalidate();
+			}
+
+			new UploadTaskWithKey().execute();
+			return null;
+		}
+	}
+	
+	/**
+	 * Tests uploading data to a project with key
+	 *
+	 * @author bobby
+	 *
+	 */
+	class UploadTaskWithKey extends SwingWorker<Object, Object> {
+		/**
+		 * @throws Exception
+		 */
+		@Override
+		protected Object doInBackground() throws Exception {
+			JSONObject j = new JSONObject();
+			try {
+				j.put("4410", new JSONArray().put("2013/08/02 09:50:01")); //hardcode bad but only because I can't add a key to a project
+				j.put("4411", new JSONArray().put("45"));
+			} catch (JSONException e) {
+				e.printStackTrace();
+				return null;
+			}
+
+			dataSetInfo = api.uploadDataSet(978, j, "mobile upload test"); //another bad hardcode until I can create a proj with key for testing
+
+			JLabel status = new JLabel();
+			if (dataSetInfo.success) {
+				status.setText("Upload data set with key success. ID = "
+						+ dataSetInfo.dataSetId);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.green);
+
+				results.add(status);
+				frame.revalidate();
+			} else {
+				status.setText("Upload data with key fail. Error Message: "
+						+ dataSetInfo.errorMessage);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.red);
+
+				results.add(status);
+				frame.revalidate();
+			}
+			new ProjMediaTaskWithKey().execute();
+			return null;
+		}
+	}
+	
+	/**
+	 * Tests uploading media with Key
+	 *
+	 * @author bobby
+	 *
+	 */
+	class ProjMediaTaskWithKey extends SwingWorker<Object, Object> {
+		/**
+		 * @throws Exception
+		 */
+		@Override
+		protected Object doInBackground() throws Exception {
+			UploadInfo info = api.uploadMedia(978, new File("test.jpg"), //hardcoded bad, but can't add key to project
+					API.TargetType.PROJECT, "key", "tester");
+
+			JLabel status = new JLabel();
+			if (info.success) {
+				status.setText("Upload media to project 978 success with key. ID: "
+						+ info.mediaId);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.green);
+
+				results.add(status);
+				frame.revalidate();
+			} else {
+				status.setText("Upload media to project 978 with key fail.");
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.red);
+
+				results.add(status);
+				frame.revalidate();
+			}
+
+			new DSMediaTaskWithKey().execute();
+
+			return null;
+		}
+	}
+
+	/**
+	 * Tests uploading media to a data set with a key
+	 *
+	 * @author bobby
+	 *
+	 */
+	class DSMediaTaskWithKey extends SwingWorker<Object, Object> {
+		/**
+		 * @throws Exception
+		 */
+		@Override
+		protected Object doInBackground() throws Exception {
+			UploadInfo info = api.uploadMedia(6938, new File( //hardcoded bad, but can't add key to project
+					"test.jpg"), API.TargetType.DATA_SET, "key", "tester");
+
+			JLabel status = new JLabel();
+			if (info.success) {
+				status.setText("Upload media to data set 6938 with key successful. ID: "
+						+ info.mediaId);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.green);
+
+				results.add(status);
+				frame.revalidate();
+			} else {
+				status.setText("Upload media to data set 6938 with key failed.");
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
