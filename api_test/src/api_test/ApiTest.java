@@ -39,6 +39,7 @@ public class ApiTest {
 
 	private JButton dev;
 	private JButton live;
+	private JButton localhost;
 
 	API api;
 
@@ -49,6 +50,8 @@ public class ApiTest {
 	UploadInfo dataSetInfo;
 
 	ArrayList<RProjectField> fields;
+
+	boolean testingDev;
 
 	/**
 	 * Launch the application.
@@ -101,10 +104,12 @@ public class ApiTest {
 		// buttons
 		dev = new JButton("Test Dev");
 		live = new JButton("Test Production");
+		localhost = new JButton("Test localhost:3000");
 
 		// Size of buttons
 		dev.setSize(100, 50);
 		live.setSize(100, 50);
+		localhost.setSize(100, 50);
 
 		// JLabel status = new JLabel("Results will be displayed here.");
 
@@ -112,8 +117,9 @@ public class ApiTest {
 		buttons = new JPanel();
 		buttons.add(dev);
 		buttons.add(live);
-		buttons.setMinimumSize(new Dimension(300, 50));
-		buttons.setMaximumSize(new Dimension(300, 50));
+		buttons.add(localhost);
+		buttons.setMinimumSize(new Dimension(500, 50));
+		buttons.setMaximumSize(new Dimension(500, 50));
 
 		// panel to show results of test
 		results = new JPanel();
@@ -132,6 +138,7 @@ public class ApiTest {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				api.useDev(true);
+				testingDev = true;
 				JLabel status = new JLabel();
 				status.setText("Starting tests on rsense-dev...");
 				Font font = status.getFont();
@@ -152,8 +159,30 @@ public class ApiTest {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				api.useDev(false);
+				testingDev = false;
 				JLabel status = new JLabel();
 				status.setText("Starting tests on isenseproject...");
+				Font font = status.getFont();
+				Font bold = new Font(font.getFontName(), Font.BOLD, font
+						.getSize());
+				status.setFont(bold);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				results.add(status);
+
+				frame.revalidate();
+				new LoginTask().execute();
+			}
+		});
+
+		// Called when localhost button is clicked
+		localhost.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				api.useDev(true);
+				testingDev = false;
+				api.setBaseUrl("http://localhost:3000/");
+				JLabel status = new JLabel();
+				status.setText("Starting tests on localhost:3000");
 				Font font = status.getFont();
 				Font bold = new Font(font.getFontName(), Font.BOLD, font
 						.getSize());
@@ -439,7 +468,7 @@ public class ApiTest {
 
 			JLabel status = new JLabel();
 			if (info.success) {
-				status.setText("Append data set success.");
+				status.setText("Append data set success. Dataset:" + dataSetInfo.dataSetId + " Data: 2013/08/05 10:50:20 , 119");
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
 
@@ -532,17 +561,17 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			}
-			
-			if (api.isLive()) {
-				new LogoutTask().execute();
-			} else {
+
+			if (testingDev) {
 				new UploadTaskWithKey().execute(); //hardcoded for projects on dev because I can't create a project with a key
+			} else {
+				new LogoutTask().execute();
 			}
-				
+
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Tests uploading data to a project with key
 	 *
@@ -588,7 +617,7 @@ public class ApiTest {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Tests uploading media with Key
 	 *

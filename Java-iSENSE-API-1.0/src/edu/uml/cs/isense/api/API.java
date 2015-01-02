@@ -41,8 +41,8 @@ import edu.uml.cs.isense.objects.RProjectField;
  */
 
 public class API {
-	private String version_major = "4";
-	private String version_minor = "1";
+	private final String version_major = "4";
+	private final String version_minor = "1";
 	private String version;
 
 	private static API instance = null;
@@ -464,7 +464,7 @@ public class API {
 	 *         fails
 	 */
 	public UploadInfo uploadDataSet(int projectId, JSONObject data,
-			String datasetName) {
+		String datasetName) {
 		UploadInfo info = new UploadInfo();
 		datasetName += appendedTimeStamp();
 		String reqResult = "";
@@ -531,6 +531,7 @@ public class API {
 
 			reqResult = makeRequest(baseURL, "projects/" + projectId
 					+ "/jsonDataUpload", "", "POST", requestData);
+
 			JSONObject jobj = new JSONObject(reqResult);
 			info.dataSetId = jobj.getInt("id");
 			if (jobj.getInt("id") != -1) {
@@ -568,74 +569,40 @@ public class API {
 	 * @return success or failure
 	 */
 	public UploadInfo appendDataSetData(int dataSetId, JSONObject newData) {
-		JSONObject requestData = new JSONObject();
-		RDataSet existingDs = getDataSet(dataSetId);
-		String result = "";
-		UploadInfo info = new UploadInfo();
-		try {
-			JSONObject combined = existingDs.data;
-			// merge newdata into combined
-			Iterator<?> keys = newData.keys();
-			while (keys.hasNext()) {
-				String key = (String) keys.next();
-				for (int i = 0; i < newData.getJSONArray(key).length(); i++) {
-					combined.accumulate(key, newData.getJSONArray(key).get(i));
-				}
-			}
-			// fill in blank spots
-			int maxDatapoints = 0;
-			keys = combined.keys();
-			while (keys.hasNext()) {
-				String key = (String) keys.next();
-				if (combined.getJSONArray(key).length() > maxDatapoints) {
-					maxDatapoints = combined.getJSONArray(key).length();
-				}
-			}
-			keys = combined.keys();
-			while (keys.hasNext()) {
-				String key = (String) keys.next();
-				while (combined.getJSONArray(key).length() < maxDatapoints) {
-					combined.accumulate(key, "");
-				}
-			}
-			requestData.put("data", combined);
-			requestData.put("id", "" + dataSetId);
 
-			result = makeRequest(
-					baseURL,
-					"data_sets/" + dataSetId + "/edit",
-					"authenticity_token="
-							+ URLEncoder.encode(authToken, "UTF-8"), "POST",
-					requestData);
+			UploadInfo info = new UploadInfo();
+			String reqResult = "";
+			JSONObject requestData = new JSONObject();
 
-			JSONObject resultObject = new JSONObject(result);
-
-			// if status is not 200 return false
-			if (200 != resultObject.getInt("status")) {
-				JSONObject jobj = new JSONObject(result);
-				info.errorMessage = jobj.getString("error");
-				info.success = false;
-				return info;
-			} else {
-				info.success = true;
-				return info;
-			}
-
-		} catch (Exception e) {
 			try {
-				JSONObject jobj = new JSONObject(result);
-				info.errorMessage = jobj.getString("msg");
-			} catch (Exception e2) {
+				requestData.put("email", email);
+				requestData.put("password", password);
+				requestData.put("id", dataSetId);
+				requestData.put("data", newData);
+				reqResult = makeRequest(baseURL, "data_sets/"
+						+ "/append", "", "POST", requestData);
+				JSONObject jobj = new JSONObject(reqResult);
+				info.dataSetId = jobj.getInt("id");
+				if (jobj.getInt("id") != -1) {
+					info.success = true;
+				}
+				return info;
+			} catch (Exception e) {
 				try {
-					JSONObject jobj = new JSONObject(result);
-					info.errorMessage = jobj.getString("error");
-				} catch (Exception e3) {
-					info.errorMessage = result;
+					JSONObject jobj = new JSONObject(reqResult);
+					info.errorMessage = jobj.getString("msg");
+				} catch (Exception e2) {
+					try {
+						JSONObject jobj = new JSONObject(reqResult);
+						info.errorMessage = jobj.getString("error");
+					} catch (Exception e3) {
+						info.errorMessage = reqResult;
+					}
 				}
 			}
-		}
-		info.success = false;
-		return info;
+			info.success = false;
+			info.dataSetId = -1;
+			return info;
 	}
 
 	/**
