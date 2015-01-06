@@ -284,12 +284,67 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			}
-			new ProjectsTask().execute();
+			//new ProjectsTask().execute();
+			new AddKeyTask().execute();
+			return null;
+
+		}
+	}
+
+	/**
+	 * Test Creating a Project
+	 *
+	 * @author bobby
+	 *
+	 */
+	class AddKeyTask extends SwingWorker<Object, Object> {
+		/**
+		 * @throws Exception
+		 */
+		@Override
+		protected Object doInBackground() throws Exception {
+			ArrayList<RProjectField> fields = new ArrayList<RProjectField>();
+
+			RProjectField time = new RProjectField();
+			time.type = RProjectField.TYPE_TIMESTAMP;
+			time.name = "Time";
+			fields.add(time);
+
+			RProjectField amount = new RProjectField();
+			amount.type = RProjectField.TYPE_NUMBER;
+			amount.name = "Amount";
+			amount.unit = "units";
+			fields.add(amount);
+
+			UploadInfo info = api.addKey(String.valueOf(projectId), "testname", "test");
+			projectId = info.projectId;
+			JLabel status = new JLabel();
+
+			if (info.success) {
+				status.setText("Add Key Success."
+						+ info.projectId);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.green);
+
+				results.add(status);
+				frame.revalidate();
+			} else {
+				status.setText("Add Key Fail"
+						+ info.errorMessage);
+				status.setAlignmentX(Component.CENTER_ALIGNMENT);
+				status.setForeground(Color.red);
+
+				results.add(status);
+				frame.revalidate();
+			}
+//			new ProjectsTask().execute();
 
 			return null;
 
 		}
 	}
+
+
 
 	/**
 	 * Tests api call to get a list of the projects on isense
