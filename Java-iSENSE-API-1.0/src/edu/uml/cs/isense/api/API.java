@@ -605,7 +605,7 @@ public class API {
 			return info;
 	}
 
-	public UploadInfo addKey(String project, String keyname, String key) {
+	public UploadInfo createKey(String project, String keyname, String key) {
 
 		UploadInfo info = new UploadInfo();
 		String reqResult = "";
@@ -622,8 +622,9 @@ public class API {
 			reqResult = makeRequest(baseURL, "projects/" + project
 					+ "/key", "", "POST", requestData);
 			JSONObject jobj = new JSONObject(reqResult);
-			info.dataSetId = jobj.getInt("id");
-			if (jobj.getInt("id") != -1) {
+			System.out.println(reqResult.toString());
+			
+			if (jobj.getString("msg").equals("Success")) {
 				info.success = true;
 			}
 			return info;

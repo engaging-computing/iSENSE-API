@@ -126,7 +126,8 @@ public class ApiTest {
 		results.setLayout(new BoxLayout(results, BoxLayout.Y_AXIS));
 
 		JScrollPane scrollPane = new JScrollPane(results);
-		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(25);
+		scrollPane.getHorizontalScrollBar().setUnitIncrement(25);
 
 		// add button panel and results panel to window
 		frame.add(buttons);
@@ -316,13 +317,11 @@ public class ApiTest {
 			amount.unit = "units";
 			fields.add(amount);
 
-			UploadInfo info = api.addKey(String.valueOf(projectId), "testname", "test");
-			projectId = info.projectId;
+			UploadInfo info = api.createKey(String.valueOf(projectId), "key_name", "key");
 			JLabel status = new JLabel();
 
 			if (info.success) {
-				status.setText("Add Key Success."
-						+ info.projectId);
+				status.setText("Add Key Success.");
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
 
@@ -337,7 +336,7 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			}
-//			new ProjectsTask().execute();
+			new ProjectsTask().execute();
 
 			return null;
 
@@ -617,11 +616,7 @@ public class ApiTest {
 				frame.revalidate();
 			}
 
-			if (testingDev) {
-				new UploadTaskWithKey().execute(); //hardcoded for projects on dev because I can't create a project with a key
-			} else {
-				new LogoutTask().execute();
-			}
+			new UploadTaskWithKey().execute();
 
 			return null;
 		}
@@ -641,18 +636,18 @@ public class ApiTest {
 		protected Object doInBackground() throws Exception {
 			JSONObject j = new JSONObject();
 			try {
-				j.put("4410", new JSONArray().put("2013/08/02 09:50:01")); //hardcode bad but only because I can't add a key to a project
+				j.put("4410", new JSONArray().put("2013/08/02 09:50:01")); //TODO get fields
 				j.put("4411", new JSONArray().put("45"));
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return null;
 			}
 
-			dataSetInfo = api.uploadDataSet(978, j, "mobile upload test", "key", "tester"); //another bad hardcode until I can create a proj with key for testing
+			dataSetInfo = api.uploadDataSet(projectId, j, "mobile upload test", "key", "key via api"); 
 
 			JLabel status = new JLabel();
 			if (dataSetInfo.success) {
-				status.setText("Upload data set with key success. ID = "
+				status.setText("Upload data set " + dataSetInfo.dataSetId + " with key success. ID = "
 						+ dataSetInfo.dataSetId);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
@@ -685,8 +680,8 @@ public class ApiTest {
 		 */
 		@Override
 		protected Object doInBackground() throws Exception {
-			UploadInfo info = api.uploadMedia(978, new File("test.jpg"), //hardcoded bad, but can't add key to project
-					API.TargetType.PROJECT, "key", "tester");
+			UploadInfo info = api.uploadMedia(projectId, new File("test.jpg"), //TODOhardcoded bad, but can't add key to project
+					API.TargetType.PROJECT, "key", "key via api");
 
 			JLabel status = new JLabel();
 			if (info.success) {
@@ -724,12 +719,12 @@ public class ApiTest {
 		 */
 		@Override
 		protected Object doInBackground() throws Exception {
-			UploadInfo info = api.uploadMedia(6938, new File( //hardcoded bad, but can't add key to project
+			UploadInfo info = api.uploadMedia(dataSetInfo.dataSetId, new File( 
 					"test.jpg"), API.TargetType.DATA_SET, "key", "tester");
 
 			JLabel status = new JLabel();
 			if (info.success) {
-				status.setText("Upload media to data set 6938 with key successful. ID: "
+				status.setText("Upload media to data set" + dataSetInfo.dataSetId + " with key successful. ID: "
 						+ info.mediaId);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
@@ -737,7 +732,7 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			} else {
-				status.setText("Upload media to data set 6938 with key 'key' failed. Error Message: " + info.errorMessage);
+				status.setText("Upload media to data set " + dataSetInfo.dataSetId + " with key 'key' failed. Error Message: " + info.errorMessage);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
