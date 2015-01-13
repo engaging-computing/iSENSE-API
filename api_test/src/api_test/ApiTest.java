@@ -685,7 +685,7 @@ public class ApiTest {
 
 			JLabel status = new JLabel();
 			if (info.success) {
-				status.setText("Upload media to project 978 success with key. ID: "
+				status.setText("Upload media to project " + projectId + " success with key. ID: "
 						+ info.mediaId);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
@@ -693,7 +693,7 @@ public class ApiTest {
 				results.add(status);
 				frame.revalidate();
 			} else {
-				status.setText("Upload media to project 978 with key 'key' failed. Error message: " + info.errorMessage);
+				status.setText("Upload media to project " + projectId + " with key 'key' failed. Error message: " + info.errorMessage);
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.red);
 
