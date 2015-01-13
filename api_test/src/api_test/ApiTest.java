@@ -522,7 +522,7 @@ public class ApiTest {
 
 			JLabel status = new JLabel();
 			if (info.success) {
-				status.setText("Append data set success. Dataset:" + dataSetInfo.dataSetId + " Data: 2013/08/05 10:50:20 , 119");
+				status.setText("Append data set success. id:" + dataSetInfo.dataSetId + " Data: 2013/08/05 10:50:20 , 119");
 				status.setAlignmentX(Component.CENTER_ALIGNMENT);
 				status.setForeground(Color.green);
 
@@ -635,14 +635,17 @@ public class ApiTest {
 		@Override
 		protected Object doInBackground() throws Exception {
 			JSONObject j = new JSONObject();
+			ArrayList <RProjectField> fields = api.getProjectFields(projectId);
+			RProjectField field1 = fields.get(0);
+			RProjectField field2 = fields.get(1);
+				
 			try {
-				j.put("4410", new JSONArray().put("2013/08/02 09:50:01")); //TODO get fields
-				j.put("4411", new JSONArray().put("45"));
+				j.put("" + field1.field_id, new JSONArray().put("2013/08/02 09:50:01"));
+				j.put("" + field2.field_id, new JSONArray().put("45"));
 			} catch (JSONException e) {
 				e.printStackTrace();
 				return null;
 			}
-
 			dataSetInfo = api.uploadDataSet(projectId, j, "mobile upload test", "key", "key via api"); 
 
 			JLabel status = new JLabel();
