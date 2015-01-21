@@ -620,7 +620,7 @@ public class API {
 			requestData.put("password", password);
 			requestData.put("contrib_key", contrib_key);
 			reqResult = makeRequest(baseURL, "projects/" + project
-					+ "/key", "", "POST", requestData);
+					+ "/add_key", "", "POST", requestData);
 			JSONObject jobj = new JSONObject(reqResult);
 			System.out.println(reqResult.toString());
 			
