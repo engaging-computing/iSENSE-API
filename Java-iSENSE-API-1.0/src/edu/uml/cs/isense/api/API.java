@@ -605,6 +605,47 @@ public class API {
 			return info;
 	}
 
+	public UploadInfo createKey(String project, String keyname, String key) {
+
+		UploadInfo info = new UploadInfo();
+		String reqResult = "";
+		JSONObject requestData = new JSONObject();
+		JSONObject contrib_key = new JSONObject();
+		try {
+			contrib_key.put("project_id", project);
+			contrib_key.put("name", keyname);
+			contrib_key.put("key", key);
+
+			requestData.put("email", email);
+			requestData.put("password", password);
+			requestData.put("contrib_key", contrib_key);
+			reqResult = makeRequest(baseURL, "projects/" + project
+					+ "/add_key", "", "POST", requestData);
+			JSONObject jobj = new JSONObject(reqResult);
+			System.out.println(reqResult.toString());
+			
+			if (jobj.getString("msg").equals("Success")) {
+				info.success = true;
+			}
+			return info;
+		} catch (Exception e) {
+			try {
+				JSONObject jobj = new JSONObject(reqResult);
+				info.errorMessage = jobj.getString("msg");
+			} catch (Exception e2) {
+				try {
+					JSONObject jobj = new JSONObject(reqResult);
+					info.errorMessage = jobj.getString("error");
+				} catch (Exception e3) {
+					info.errorMessage = reqResult;
+				}
+			}
+		}
+		info.success = false;
+		info.dataSetId = -1;
+		return info;
+}
+
 	/**
 	 * Uploads a file to the media section of a project while logged in
 	 *
