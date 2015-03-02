@@ -87,7 +87,9 @@ const string dev_baseURL = "http://rsense-dev.cs.uml.edu";
 const string live_baseURL = "http://isenseproject.org";
 const string devURL = "http://rsense-dev.cs.uml.edu/api/v1";
 const string liveURL = "http://isenseproject.org/api/v1";
+
 const int CURL_ERROR = -1;
+const string GET_ERROR = "ERROR";
 
 class iSENSE
 {
@@ -158,6 +160,12 @@ public:
   // Search for projects with the search term
   vector<string> get_projects_search(string search_term);
 
+  // Return a vector of data given a field name
+  vector<string> get_dataset(string dataset_name, string field_name);
+
+  // Future: return a map of media objects
+  // map<string, vector<string> > get_media_objects();
+
   bool post_json_email();          // Post using a email / password
   bool post_json_key();            // Post using contributor key
 
@@ -181,16 +189,20 @@ public:
    *    Note - the edit functions are not yet complete.
    *
    */
-  
+
   // Appends to a dataset using a dataset name and either a key or email/password
   bool append_key_byName(string dataset_name);
   bool append_email_byName(string dataset_name);
+
+  // Helper methods
+  std::string get_Dataset_ID(string dataset_name);
+  std::string get_Field_ID(string field_name);
 
   /*  Future functions to be implemented at a later date.
       //  Editing API calls (not yet implemented)
       bool get_edit_key();      // Edit a dataset with a dataset ID & contributor key
       bool get_edit_user();     // Edit a dataset with a dataset ID & email / password
-  
+
       //  Post media objects - this is less of a priority but still could be interesting to do.
       bool post_media_objects_email();
       bool post_media_objects_key();
@@ -203,9 +215,9 @@ public:
   // For debugging, this method dumps all the data.
   void debug();
 
-  
+
 protected:
-  
+
   /*  Users do not need to worry about dataset IDs. They only need to pass the
    *  append function a valid dataset name - that is, the name as it appears on iSENSE.
    *  This method is marked as protected to prevent users from accessing it.
@@ -213,9 +225,9 @@ protected:
   void set_dataset_ID(string proj_dataset_ID);  // Need to set the dataset ID for appending.
   bool append_key_byID(string dataset_ID);       // Appends a dataset with a contributor key
   bool append_email_byID(string dataset_ID);        // Amend a dataset with a email / password
-  
+
 private:
-  
+
   /*  These two 'objects' are picojson objects that will be used to upload to iSENSE.
    *  The upload_data object contains the entire upload string, in JSON format.
    *  Picojson will let us output this to a string and then pass that string to libcurl.
