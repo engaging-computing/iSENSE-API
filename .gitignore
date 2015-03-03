@@ -48,3 +48,15 @@
 
 # Backup Merge Files
 *.orig
+
+# C Executables
+*.exe
+*.out
+*.app
+
+# C object files
+*.o
+*o.obj
+
+# ignore the picojson header file
+picojson.h
