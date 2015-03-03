@@ -1324,30 +1324,30 @@ bool iSENSE::append_email_byName(string dataset_name)
 // It formats the upload string
 // Users should not have to call this function - API methods will,
 // and will pass an int value indicating which API method they are using.
-void iSENSE::format_upload_string(int key)
+void iSENSE::format_upload_string(int post_type)
 {
   // Add the title + the correct formatting
   upload_data["title"] = value(title);
 
-  // This is now a switch. Any future API methods can be added here.
-  switch(key)
+  // This is now a switch. Future API methods can be added here.
+  switch(post_type)
   {
-    case 1:
+    case Post_Key:
       upload_data["contribution_key"] = value(contributor_key);
       upload_data["contributor_name"] = value(contributor_label);
       break;
 
-    case 2:
+    case Append_Key:
       upload_data["contribution_key"] = value(contributor_key);
       upload_data["id"] = value(dataset_ID);
       break;
 
-    case 3:
+    case Post_Email:
       upload_data["email"] = value(email);
       upload_data["password"] = value(password);
       break;
 
-    case 4:
+    case Append_Email:
       upload_data["email"] = value(email);
       upload_data["password"] = value(password);
       upload_data["id"] = value(dataset_ID);
@@ -1421,7 +1421,7 @@ void iSENSE::format_data(vector<string> *vect, array::iterator it, string field_
  *
  *    Function returns an HTTP response code, like "200", "404", "503", etc.
  */
-int iSENSE::post_data_function(int type)
+int iSENSE::post_data_function(int post_type)
 {
   // Upload_URL must have already been set. Otherwise the POST request will fail
   // unexpectedly.
@@ -1432,7 +1432,7 @@ int iSENSE::post_data_function(int type)
   }
 
   // Format the data to be uploaded. Call another function to format this.
-  format_upload_string(type);
+  format_upload_string(post_type);
 
   /*  Once we get the data formatted, we can try to POST to rSENSE
    *    The below code uses cURL. It
