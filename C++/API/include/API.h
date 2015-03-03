@@ -89,10 +89,10 @@ const string devURL = "http://rsense-dev.cs.uml.edu/api/v1";
 const string liveURL = "http://isenseproject.org/api/v1";
 
 // POST related constants
-const int Post_Key = 1;
-const int Append_Key = 2;
-const int Post_Email = 3;
-const int Append_Email = 4;
+const int POST_KEY = 1;
+const int APPEND_KEY = 2;
+const int POST_EMAIL = 3;
+const int APPEND_EMAIL = 4;
 
 // Error checking constants
 const int CURL_ERROR = -1;

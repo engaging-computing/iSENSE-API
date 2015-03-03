@@ -823,7 +823,7 @@ bool iSENSE::post_json_key()
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
 
   // Call the POST function, give it type 1 since this is a upload JSON by contributor key.
-  int http_code = post_data_function(1);
+  int http_code = post_data_function(POST_KEY);
 
   /*
   *  The iSENSE API gives us two response codes to check against:
@@ -932,7 +932,7 @@ bool iSENSE::append_key_byID(string dataset_ID)
   upload_URL = devURL + "/data_sets/append";
 
   // Call the POST function, give it type 2 since this is an append by contributor key.
-  int http_code = post_data_function(2);
+  int http_code = post_data_function(APPEND_KEY);
 
    /*
     *  The iSENSE API gives us two response codes to check against:
@@ -1106,7 +1106,7 @@ bool iSENSE::post_json_email()
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
 
   // Call the POST function, give it type 3 since this is upload JSON by email & password.
-  int http_code = post_data_function(3);
+  int http_code = post_data_function(POST_EMAIL);
 
   /*
     *  The iSENSE API gives us two response codes to check against:
@@ -1206,7 +1206,7 @@ bool iSENSE::append_email_byID(string dataset_ID)
   upload_URL = devURL + "/data_sets/append";
 
   // Call the POST function, give it type 4 since this is append JSON by email & password.
-  int http_code = post_data_function(4);
+  int http_code = post_data_function(APPEND_EMAIL);
 
   /*
     *  The iSENSE API gives us two response codes to check against:
@@ -1332,22 +1332,22 @@ void iSENSE::format_upload_string(int post_type)
   // This is now a switch. Future API methods can be added here.
   switch(post_type)
   {
-    case Post_Key:
+    case POST_KEY:
       upload_data["contribution_key"] = value(contributor_key);
       upload_data["contributor_name"] = value(contributor_label);
       break;
 
-    case Append_Key:
+    case APPEND_KEY:
       upload_data["contribution_key"] = value(contributor_key);
       upload_data["id"] = value(dataset_ID);
       break;
 
-    case Post_Email:
+    case POST_EMAIL:
       upload_data["email"] = value(email);
       upload_data["password"] = value(password);
       break;
 
-    case Append_Email:
+    case APPEND_EMAIL:
       upload_data["email"] = value(email);
       upload_data["password"] = value(password);
       upload_data["id"] = value(dataset_ID);
