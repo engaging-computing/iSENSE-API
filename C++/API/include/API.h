@@ -5,7 +5,7 @@
 #ifdef WIN32
 #include <curl.h>                 // cURL to make HTTP requests
 
-// Linux / other systems. (Test MacOS and see if it likes it this way or the Windows way)
+// Linux / other systems.
 #else
 #include <curl/curl.h>            // cURL to make HTTP requests
 #endif
@@ -19,43 +19,6 @@
 #include "memfile.h"              // picojson/curl uses this for temp files.
 
 /*
- *    To do list:
- *
- *    1. Appending / editing datasets
- *      - Appending now works and can also pull down all the datasets in a project.
- *      - Try the edit API call and see if its useful.
- *
- *    2. Pulling data off of iSENSE, then appending to that via push_back.
- *      - This can now be done since pulling datasets works.
- *      - Need to add a way to return data in the form of some sort of map though.
- *        That way users can pull down datasets, get a map to play with and then
- *        reupload data through push_back(string) and push_back(vector)
- *
- *    3. Media objects
- *      - Since datasets are pulled down, media objects also get pulled down.
- *        Could add the same ability as datasets - return a map of media objects
- *      - Also work on allowing media objects to be pushed to iSENSE through the
- *        media objects API call
- *
- *    4. Test file that should also work as an example of all the various API methods
- *      - Boost tests now written.
- *      - Only 7 which test basic JSON uploading and appending.
- *      - Should test more areas of the API
- *
- *    5. Dice roll app to serve as another example.
- *      - Possible to rewrite it using the API now.
- *      - Should be very simple. Add it to the Makefile once completed.
- *
- *    6. Baseball app to serve as an example of pulling data and uploading it.
- *      - Requires above mentioned map of datasets.
- *      - Can use the push_back(vector) method to push data back to iSENSE.
- *
- *    7. Create a zip file for people to download for Linux / Mac.
- *      - Install script could be useful.
- *        Just need to write a bash script that install curl, git clones the repo,
- *        curls picojson.h off of the picojson repo and then runs the Makefile
- *        to test stuff.
- *
  *    Currently working on:
  *    Linux (64 bit) -> Uses a Makefile
  *    Mac OS 10.10 (64 bit) -> should work the same as Linux
@@ -64,20 +27,12 @@
 
 /*
  * NOTE:
- * Most of the API calls expect that you have already set an email & password OR a contributor
- * key, as well as a project ID and a project title. You can set these by either calling the
- * default constructor with parameters, or by calling one of the set methods.
+ * Most of the API calls expect that you have already set an email & password
+ * OR a contributor key, as well as a project ID and a project title.
+ * You can set these by either calling the default constructor with parameters,
+ * or by calling one of the set methods.
  *
  */
-
-// To avoid poluting the namespace, and also to avoid typing std:: everywhere.
-using std::cin;
-using std::cout;
-using std::endl;
-using std::map;
-using std::string;
-using std::to_string;
-using std::vector;
 
 // For picojson
 using namespace picojson;
@@ -98,42 +53,43 @@ const int APPEND_EMAIL = 4;
 const int CURL_ERROR = -1;
 const string GET_ERROR = "ERROR";
 
-class iSENSE
-{
+class iSENSE {
 public:
-  iSENSE();                                          // Default constructor
-  iSENSE(string proj_ID, string proj_title,          // Contructor with parameters
+  iSENSE();
+  iSENSE(string proj_ID, string proj_title,
          string label, string contr_key);
 
 
-  // Similar to the constructor with parameters, but called after the object is created.
-  // This way you can change/update the title/project ID/etc.
+  // Similar to the constructor with parameters, but called after
+  // the object is created. This way you can change the title/project ID/etc.
   void set_project_all(string proj_ID, string proj_title,
                        string label, string contr_key);
 
-  void set_project_ID(string proj_ID);          // This function should set up all the fields
-  void set_project_title(string proj_title);    // The user should also set the project title
-  void set_project_label(string proj_label);    // Optional, by default the label will be "cURL"
-  void set_contributor_key(string proj_key);    // User needs to set the contributor key
+  void set_project_ID(string proj_ID);
+  void set_project_title(string proj_title);
+  void set_contributor_key(string proj_key);
 
-  // This function should be used for setting the email / password for a project.
-  // It will return true if the email / password are valid, or false if they are not.
+  // Optional, by default the label will be "cURL"
+  void set_project_label(string proj_label);
+
+  // This should be used for setting the email / password for a project.
+  // Returns true if the email / password are valid, or false if they are not.
   bool set_email_password(string proj_email, string proj_password);
 
   /*  This function will push data back to the map.
    *  User must give the pushback function the following:
    *    1. Field name (as seen on iSENSE)
-   *    2. Some data (in string format). For numbers, use to_string.
+   *    2. Some data (in string format). For numbers, use std::to_string.
    *
    *  Note: this function merely pushes a single piece of data to the map.
-   *  If you would like to add more than one string of data, you should used
-   *  either a loop or create a vector of strings and push that back to the object.
+   *  If you want to add more than one string of data, you should used either
+   *  a loop or create a vector of strings and push that back to the object.
    */
   void push_back(string field_name, string data);
 
   /* Add a field name / vector of strings (data) to the map.
    * See above notes. Behaves similar to the push_back function.
-   * Also - if you push a vector back, it makes a copy of the vector and saves it
+   * Also if you push a vector back, it makes a copy of the vector and saves it
    * in the map. You will need to use the push_back function to add more data.
    */
   void push_vector(string field_name, vector<string> data);
@@ -141,8 +97,7 @@ public:
   // Resets the object and clears the map.
   void clear_data();
 
-  // Timestamp function to make it easier for users to use timestamps in their project.
-  // Only returns the timestamp, does not add it to the map.
+  // Note: only returns the timestamp, does not add it to the map.
   string generate_timestamp(void);
 
   // This formats the upload string
@@ -154,11 +109,9 @@ public:
   // This function makes a POST request via libcurl
   int post_data_function(int post_type);
 
-  /*  iSENSE API functions
-   *        Note: methods which return bool return true for success and false for failure.
-   *        They also output the reasons for failure to the screen.   */
-  bool get_check_user();          // Checks to see if a username / password is valid
-  bool get_project_fields();      // Pulls the fields and puts them into the fields object & array
+  // iSENSE API functions
+  bool get_check_user();      // Verifies email / password.
+  bool get_project_fields();  // GETs fields off iSENSE
 
   // This function grabs fields, datasets, media objects and owner information
   // Saves these arrays into picojson arrays.
@@ -229,9 +182,9 @@ protected:
    *  append function a valid dataset name - that is, the name as it appears on iSENSE.
    *  This method is marked as protected to prevent users from accessing it.
    */
-  void set_dataset_ID(string proj_dataset_ID);  // Need to set the dataset ID for appending.
-  bool append_key_byID(string dataset_ID);       // Appends a dataset with a contributor key
-  bool append_email_byID(string dataset_ID);        // Amend a dataset with a email / password
+  void set_dataset_ID(string proj_dataset_ID);    // Need to set the dataset ID for appending.
+  bool append_key_byID(string dataset_ID);        // Appends a dataset with a contributor key
+  bool append_email_byID(string dataset_ID);      // Amend a dataset with a email / password
 
 private:
 

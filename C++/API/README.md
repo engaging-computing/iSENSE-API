@@ -17,10 +17,10 @@ so that you can make your own program that uses the API.
 picojson.h are used along with libcurl to make HTTP requests GETing / POSTing JSON to iSENSE's
 RESTFUL API. I only suggest looking through API.h for the iSENSE class declaration.
 
-Note: picojson.h is not in this github repo. You should either 
+Note: picojson.h is not in this github repo. You should either
 [download the include.zip here](https://github.com/JasonD94/Teaching/blob/jd_data_sets/ExampleCode/C%2B%2B/Projects/include.zip)
 here by clicking on Raw, then unzip it and copy the picojson.h file into your code directory,
-or 
+or
 [go to the following link](https://raw.githubusercontent.com/kazuho/picojson/master/picojson.h)
 to find a recent copy of picojson. Right click and save the file as a header file inside your
 code directory.
@@ -29,3 +29,8 @@ code directory.
 
 Also see the notes in the C++ directory's README and look through the Projects directory
 for example projects in Visual Studios and Xcode.
+
+To run the tests file in Linux, I suggest the following commands:
+
+make
+./tests.out > stdout.txt 2> stderr.txt

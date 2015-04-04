@@ -1,18 +1,11 @@
-#include <iostream>                  // std::cout, std::cin
-#include <string>                    // std::string, std::to_string;
-#include "include/API.h"             // API class
-
-using std::cin;
-using std::cout;
-using std::endl;
-using std::string;
-using std::to_string;
+#include "include/API.h"
 
 // For picojson
 using namespace picojson;
 
 /*
- * This file requires Boost. Please make sure to run the following command before compiling:
+ * This file requires Boost. Please make sure to run the
+ * following command before compiling:
  * sudo apt-get install libboost-test-dev
  * The above command installs Boost into your development environment.
  *
@@ -20,7 +13,6 @@ using namespace picojson;
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Main
 #include <boost/test/unit_test.hpp>
-
 
 /*
   This file will run a series of tests on the C++ API
@@ -47,28 +39,23 @@ using namespace picojson;
  * Users would have to derive the class to do the same - simply using iSENSE, the
  * append_byID functions will be protected and unaccessable (since they should be using
  * the "append_byName, using dataset names rather than dataset IDs)
- * 
+ *
  */
-class Test: public iSENSE
-{
-public:
-  void check_set_dataset_ID(string proj_dataset_ID)
-  { 
+class Test: public iSENSE {
+ public:
+  void check_set_dataset_ID(string proj_dataset_ID) {
     set_dataset_ID(proj_dataset_ID);
   }
-  bool check_append_key_byID(string dataset_ID)
-  {
+  bool check_append_key_byID(string dataset_ID) {
     return append_key_byID(dataset_ID);
   }
-  bool check_append_email_byID(string dataset_ID)
-  {
+  bool check_append_email_byID(string dataset_ID) {
     return append_email_byID(dataset_ID);
   }
 };
 
 // Ensure the CheckUser() method works.
-BOOST_AUTO_TEST_CASE(Get_CheckUser)
-{
+BOOST_AUTO_TEST_CASE(Get_CheckUser) {
   iSENSE test;
 
   // Add test project
@@ -81,8 +68,7 @@ BOOST_AUTO_TEST_CASE(Get_CheckUser)
 
 
 // Test POSTing with Contributor keys
-BOOST_AUTO_TEST_CASE(Post_JSON_withKey)
-{
+BOOST_AUTO_TEST_CASE(Post_JSON_withKey) {
   iSENSE test("929", "test ", "BOOST Test", "123");
 
   // Make the title unique
@@ -98,8 +84,7 @@ BOOST_AUTO_TEST_CASE(Post_JSON_withKey)
 
 
 // Test POSTing with Email/Password
-BOOST_AUTO_TEST_CASE(Post_JSON_withEmail)
-{
+BOOST_AUTO_TEST_CASE(Post_JSON_withEmail) {
   iSENSE test("929", "test ", "BOOST Test", "123");
 
   // Make the title unique + set email/password
@@ -117,11 +102,10 @@ BOOST_AUTO_TEST_CASE(Post_JSON_withEmail)
 
 // Test Appending with Dataset IDs
 // (Email / Password)
-BOOST_AUTO_TEST_CASE(Append_withDatasetID_byEmail)
-{
+BOOST_AUTO_TEST_CASE(Append_withDatasetID_byEmail) {
   // Example of using the iSENSE class
   Test test;
-  string title, ID, dataset_ID, email, password, letters, num, timestamp;
+  std::string title, ID, dataset_ID, email, password, letters, num, timestamp;
 
   // This will be a test of the append method.
   ID = "929";
@@ -146,12 +130,11 @@ BOOST_AUTO_TEST_CASE(Append_withDatasetID_byEmail)
 
 // Test Appending with Dataset names
 // (Email / Password)
-BOOST_AUTO_TEST_CASE(Append_withDatasetName_byEmail)
-{
+BOOST_AUTO_TEST_CASE(Append_withDatasetName_byEmail) {
   /*  This is taken from the POST_email_append_byName   */
   // Example of using the iSENSE class
   iSENSE test;
-  string title, ID, dataset_name, email, password, letters, num, timestamp;
+  std::string title, ID, dataset_name, email, password, letters, num, timestamp;
 
   // This will be a test of the append method.
   ID = "929";
@@ -176,11 +159,10 @@ BOOST_AUTO_TEST_CASE(Append_withDatasetName_byEmail)
 
 // Test Appending with Dataset IDs
 // (Contributor keys)
-BOOST_AUTO_TEST_CASE(Append_withDatasetID_byKey)
-{
+BOOST_AUTO_TEST_CASE(Append_withDatasetID_byKey) {
   // Example of using the iSENSE class
   Test test;
-  string title, ID, dataset_ID, key, letters, num, timestamp;
+  std::string title, ID, dataset_ID, key, letters, num, timestamp;
 
   // This will be a test of the append method.
   title = "this works?";
@@ -204,12 +186,11 @@ BOOST_AUTO_TEST_CASE(Append_withDatasetID_byKey)
 
 // Test Appending with Dataset names
 // (Contributor keys)
-BOOST_AUTO_TEST_CASE(Append_withDatasetName_byKey)
-{
+BOOST_AUTO_TEST_CASE(Append_withDatasetName_byKey) {
   /*  This is taken from the POST_email_append_byName   */
   // Example of using the iSENSE class
   iSENSE test;
-  string title, ID, dataset_name, label, key;
+  std::string title, ID, dataset_name, label, key;
 
   // This will be a test of the append method.
   ID = "1029";
