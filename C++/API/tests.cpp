@@ -43,13 +43,13 @@ using namespace picojson;
  */
 class Test: public iSENSE {
  public:
-  void check_set_dataset_ID(string proj_dataset_ID) {
+  void check_set_dataset_ID(std::string proj_dataset_ID) {
     set_dataset_ID(proj_dataset_ID);
   }
-  bool check_append_key_byID(string dataset_ID) {
+  bool check_append_key_byID(std::string dataset_ID) {
     return append_key_byID(dataset_ID);
   }
-  bool check_append_email_byID(string dataset_ID) {
+  bool check_append_email_byID(std::string dataset_ID) {
     return append_email_byID(dataset_ID);
   }
 };

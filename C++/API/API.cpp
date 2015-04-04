@@ -17,8 +17,8 @@ iSENSE::iSENSE() {
 
 
 // Constructor with parameters
-iSENSE::iSENSE(string proj_ID, string proj_title,
-               string label, string contr_key) {
+iSENSE::iSENSE(std::string proj_ID, std::string proj_title,
+               std::string label, std::string contr_key) {
   set_project_ID(proj_ID);
   set_project_title(proj_title);
   set_project_label(label);
@@ -27,8 +27,8 @@ iSENSE::iSENSE(string proj_ID, string proj_title,
 
 
 // Similar to the constructor with parameters, but can be called at anytime
-void iSENSE::set_project_all(string proj_ID, string proj_title,
-                             string label, string contr_key) {
+void iSENSE::set_project_all(std::string proj_ID, std::string proj_title,
+                             std::string label, std::string contr_key) {
   set_project_ID(proj_ID);
   set_project_title(proj_title);
   set_project_label(label);
@@ -36,8 +36,7 @@ void iSENSE::set_project_all(string proj_ID, string proj_title,
 }
 
 
-// This function should be called by the user, and should set up all the fields.
-void iSENSE::set_project_ID(string proj_ID) {
+void iSENSE::set_project_ID(std::string proj_ID) {
   // Set the Project ID, and the upload/get URLs as well.
   project_ID = proj_ID;
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
@@ -47,33 +46,34 @@ void iSENSE::set_project_ID(string proj_ID) {
 
 
 // The user should also set the project title
-void iSENSE::set_project_title(string proj_title) {
+void iSENSE::set_project_title(std::string proj_title) {
   title = proj_title;
 }
 
 
 // This one is optional, by default the label will be "cURL".
-void iSENSE::set_project_label(string proj_label) {
+void iSENSE::set_project_label(std::string proj_label) {
   contributor_label = proj_label;
 }
 
 
 // As well as the contributor key they will be using
-void iSENSE::set_contributor_key(string proj_key) {
+void iSENSE::set_contributor_key(std::string proj_key) {
   contributor_key = proj_key;
 }
 
 
 // Users should never have to call this method, as it is possible to
 // pull datasets and compare dataset names to get the dataset_ID.
-// Users should instead use the append byName methods.
-void iSENSE::set_dataset_ID(string proj_dataset_ID) {
+// Users should instead use the appendbyName methods.
+void iSENSE::set_dataset_ID(std::string proj_dataset_ID) {
   dataset_ID = proj_dataset_ID;
 }
 
 
 // Sets both email & password at once. Checks for valid email / password.
-bool iSENSE::set_email_password(string proj_email, string proj_password) {
+bool iSENSE::set_email_password(std::string proj_email,
+                                std::string proj_password) {
   email = proj_email;
   password = proj_password;
 
@@ -85,8 +85,8 @@ bool iSENSE::set_email_password(string proj_email, string proj_password) {
   std::cerr << "\nError in: set_email_password()\n";
   std::cerr << "Your email and password are **not** valid.\n";
   std::cerr << "Try entering your password again.\n";
-  std::cerr << "You also need to have created an account on iSENSE / rSENSE.\n";
-  std::cerr << "You can do so here: http://rsense-dev.cs.uml.edu/users/new \n\n";
+  std::cerr << "You also need to have created an account on iSENSE.\n";
+  std::cerr << "See: http://rsense-dev.cs.uml.edu/users/new \n\n";
 
   return false;
 }
@@ -95,7 +95,7 @@ bool iSENSE::set_email_password(string proj_email, string proj_password) {
 // Extra function that the user can call to just generate an ISO 8601 timestamp
 // It does not push back to the map of vectors. It merely returns a string,
 // that users may grab and then send off to the push_back function.
-string iSENSE::generate_timestamp(void) {
+std::string iSENSE::generate_timestamp(void) {
   time_t time_stamp;
   time(&time_stamp);
   char buffer[sizeof "2011-10-08T07:07:09Z"];
@@ -105,7 +105,7 @@ string iSENSE::generate_timestamp(void) {
   strftime(buffer, sizeof buffer, "%Y-%m-%dT%H:%M:%SZ", gmtime(&time_stamp));
 
   // Converts char array (buffer) to C++ string
-  string cplusplus_timestamp(buffer);
+  std::string cplusplus_timestamp(buffer);
 
   return cplusplus_timestamp;
 }
@@ -123,6 +123,8 @@ void iSENSE::clear_data(void) {
   contributor_label = "label";
   email = "email";
   password = "password";
+
+  std::cout << "\nClearing the data arrays.\n";
 
   map_data.clear();   // Clear the map_data
 
@@ -152,16 +154,15 @@ void iSENSE::clear_data(void) {
 
 
 // Adds a string to the map, which keeps track of the data to be uploaded.
-void iSENSE::push_back(string field_name, string data)
-{
+void iSENSE::push_back(std::string field_name, std::string data) {
   // Add the piece of data to the back of the vector with the given field name.
   map_data[field_name].push_back(data);
 }
 
 
 // Add a field name / vector of strings (data) to the map.
-void iSENSE::push_vector(string field_name, vector<string> data)
-{
+void iSENSE::push_vector(std::string field_name,
+                         std::vector<std::string> data) {
   // This will store a copy of the vector<string> in the map.
   // If you decide to add more data, you will need to use the push_back method.
   map_data[field_name] = data;
@@ -170,16 +171,16 @@ void iSENSE::push_vector(string field_name, vector<string> data)
 
 // Searches for projects with the search term.
 // Returns a vector with projects that show up.
-vector<string> iSENSE::get_projects_search(string search_term) {
-  string get_search = devURL + "/projects?utf8=true&search=" + search_term
+std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
+  std::string get_search = devURL + "/projects?utf8=true&search=" + search_term
   + "&sort=updated_at&order=DESC";
 
   // Vector of project titles.
-  vector<string> project_titles;
+  std::vector<std::string> project_titles;
 
   // This project will try using CURL to make a basic GET request to rSENSE
   CURL *curl = curl_easy_init();          // cURL object
-  long http_code = 0;                         // HTTP status code
+  long http_code = 0;                     // HTTP status code
   MEMFILE* json_file = memfopen();        // Writing JSON to this file.
   char error[256];                        // Errors get written here
 
@@ -203,88 +204,21 @@ vector<string> iSENSE::get_projects_search(string search_term) {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
     // cout the http code.
-    cout << "\nhttp code was: " << http_code << endl << endl;
+    std::cout << "\nhttp code was: " << http_code << "\n\n";
+  }
+  /*
+    *        The iSENSE API gives us one response code to check against:
+    *        Success: 200 OK
+    *        If we do not get a code 200 from iSENSE, something went wrong.
+    */
 
-    /*
-     *        The iSENSE API gives us one response code to check against:
-     *        Success: 200 OK
-     *        If we do not get a code 200 from iSENSE, something went wrong.
-     */
-
-    // If we do not get a code 200, or cURL quits for some reason,
-    // we didn't successfully get the project's fields.
-    if(http_code != 200) {
-      std::cerr << "\nError in: get_projects_search(string search_term) \n";
-      std::cerr << "Project search failed.\n";
-
-      // Clean up cURL and close the memfile
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-      memfclose(json_file);
-
-      return project_titles;
-    }
-
-    // We got a code 200, so try and parse the JSON into a PICOJSON object.
-    // Error checking for the parsing occurs below.
-    string errors;
-    value projects_json;
-
-    // This will parse the JSON file.
-    parse(projects_json, json_file->data,
-          json_file->data + json_file->size, &errors);
-
-    // If we have errors, print them out and quit.
-    if(errors.empty() != true) {
-      std::cerr << "\nError in: get_projects_search(string search_term)";
-      std::cerr << "Error parsing JSON file.\n";
-      std::cerr << "Error was: " << errors << std::endl;
-
-      // Clean up cURL and close the memfile
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-      memfclose(json_file);
-
-      return project_titles;
-    }
-
-    // Convert the JSON array (projects_json) into a vector of strings
-    // (strings would be project titles);
-    array projects_array = projects_json.get<array>();
-    array::iterator it, the_begin, the_end;
-
-    the_begin = projects_array.begin();
-    the_end = projects_array.end();
-
-    // Check and see if the projects_title JSON array is empty
-    if(the_begin == the_end) {
-      /*
-       * Print an error and quit, we can't make a vector of
-       * project titles to return if the JSON array ended up empty.
-       * Probably wasn't any projects with that search term.
-       *
-       */
-      std::cerr << "\nProject title array is empty.\n";
-
-      // Clean up cURL and close the memfile
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-      memfclose(json_file);
-
-      return project_titles;  // this is an empty vector
-    }
-
-    // If we make here, we can make a vector of project titles and return that to the user.
-    for(it = projects_array.begin(); it != projects_array.end(); it++) {
-      // Get the current object
-      object obj = it->get<object>();
-
-      // Grab the field name
-      string name = obj["name"].get<string>();
-
-      // Push the name back into the vector.
-      project_titles.push_back(name);
-    }
+  // If we do not get a code 200, or cURL quits for some reason,
+  // we didn't successfully get the project's fields.
+  if (http_code != 200) {
+    std::cerr << "\nError in: get_projects_search(string search_term) \n";
+    std::cerr << "Project search failed.\n";
+    std::cerr << "Something with either curl, your internet connection, \n";
+    std::cerr << "iSENSE or something else failed.\n";
 
     // Clean up cURL and close the memfile
     curl_easy_cleanup(curl);
@@ -294,32 +228,95 @@ vector<string> iSENSE::get_projects_search(string search_term) {
     return project_titles;
   }
 
-  // If we get here, this returns an empty vector.
-  // So if curl fails, an empty vector gets returned.
-  std::cerr << "\nCurl failed, so an empty vector was returned.\n";
+  // We got a code 200, so try and parse the JSON into a PICOJSON object.
+  // Error checking for the parsing occurs below.
+  std::string errors;
+  value projects_json;
+
+  // This will parse the JSON file.
+  parse(projects_json, json_file->data,
+        json_file->data + json_file->size, &errors);
+
+  // If we have errors, print them out and quit.
+  if (errors.empty() != true) {
+    std::cerr << "\nError in: get_projects_search(string search_term)";
+    std::cerr << "Error parsing JSON file.\n";
+    std::cerr << "Error was: " << errors << "\n";
+
+    // Clean up cURL and close the memfile
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    memfclose(json_file);
+
+    return project_titles;
+  }
+
+  // Convert the JSON array (projects_json) into a vector of strings
+  // (strings would be project titles);
+  array projects_array = projects_json.get<array>();
+  array::iterator it, the_begin, the_end;
+
+  the_begin = projects_array.begin();
+  the_end = projects_array.end();
+
+  // Check and see if the projects_title JSON array is empty
+  if (the_begin == the_end) {
+    /*
+     * Print an error and quit, we can't make a vector of
+     * project titles to return if the JSON array ended up empty.
+     * Probably wasn't any projects with that search term.
+     */
+    std::cerr << "\nError in: get_projects_search(string search_term) \n";
+    std::cerr << "Project title array is empty.\n";
+
+    // Clean up cURL and close the memfile
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    memfclose(json_file);
+
+    return project_titles;  // this is an empty vector
+  }
+
+  for (it = projects_array.begin(); it != projects_array.end(); it++) {
+    // Get the current object
+    object obj = it->get<object>();
+
+    // Grab the field name
+    std::string name = obj["name"].get<std::string>();
+
+    // Push the name back into the vector.
+    project_titles.push_back(name);
+  }
+
+  // Clean up cURL and close the memfile
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+  memfclose(json_file);
+
+  // Return a vector of project titles
   return project_titles;
 }
 
 
 // Checks to see if the email / password is valid
-bool iSENSE::get_check_user()
-{
+bool iSENSE::get_check_user() {
   // First check to see if the email and password have been set.
-  if(email == "email" || password == "password") {
-    std::cerr << "Please set an email & password for this project.\n";
+  if (email == "email" || password == "password") {
+    std::cerr << "\nPlease set an email & password for this project.\n";
     return false;
-  } else if(email.empty() || password.empty()) {
-    std::cerr << "Please set an email & password for this project.\n";
+  } else if (email.empty() || password.empty()) {
+    std::cerr << "\nPlease set an email & password for this project.\n";
     return false;
   }
 
   // If we get here, an email and password have been set, so do a GET using
   // the email & password.
-  get_UserURL = devURL + "/users/myInfo?email=" + email + "&password=" + password;
+  get_UserURL = devURL + "/users/myInfo?email=" +
+                email + "&password=" + password;
 
   // This project will try using CURL to make a basic GET request to rSENSE
   CURL *curl = curl_easy_init();          // cURL object
-  long http_code;                         // HTTP status code
+  long http_code = 0;                     // HTTP status code
 
   if (curl) {
     // Set the GET URL, in this case the one be created above using the user's
@@ -334,42 +331,36 @@ bool iSENSE::get_check_user()
     // Perform the request
     curl_easy_perform(curl);
 
-    // We can actually get the HTTP response code from cURL, so let's do so to check for errors.
-    http_code = 0;
-
     // This will put the HTTP response code into the "http_code" variable.
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  }
+  /*
+    *      The iSENSE API gives us two response codes to check against:
+    *      Success: 200 OK
+    *      Failure: 401 Unauthorized
+    */
 
-    /*
-     *      The iSENSE API gives us two response codes to check against:
-     *      Success: 200 OK
-     *      Failure: 401 Unauthorized
-     */
-
-    if(http_code == 200) {
-      // Clean up cURL
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-
-      // Return success.
-      return true;
-    }
-
+  if (http_code == 200) {
     // Clean up cURL
     curl_easy_cleanup(curl);
     curl_global_cleanup();
+
+    // Return success.
+    return true;
   }
+
+  // Clean up cURL
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
 
   // If curl fails, return false.
   return false;
 }
 
 
-// This is pretty much straight from the GET_curl.cpp file.
-bool iSENSE::get_project_fields()
-{
-  // Detect errors. We need a valid project ID before we try and perform a GET request.
-  if(project_ID == "empty" || project_ID.empty()) {
+// GET the project fields for a given project ID
+bool iSENSE::get_project_fields() {
+  if (project_ID == "empty" || project_ID.empty()) {
     std::cerr << "Error - project ID not set!\n";
     return false;
   }
@@ -379,65 +370,64 @@ bool iSENSE::get_project_fields()
   // This project will try using CURL to make a basic GET request to rSENSE
   // It will then save the JSON it recieves into a picojson object.
   CURL *curl = curl_easy_init();      // cURL object
-  long http_code;                     // HTTP status code
+  long http_code = 0;                 // HTTP status code
   MEMFILE* json_file = memfopen();    // Writing JSON to this file.
   char error[256];                    // Errors get written here
 
-  if(curl) {
+  if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error);    // Write errors to the array "error"
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error);
 
-    // From the picojson example, "github-issues.cc". Used  for writing the JSON to a file.
+    // From the picojson example, "github-issues.cc".
+    // Used  for writing the JSON to a file.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memfwrite);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, json_file);
 
     // Perform the request, res will get the return code
     curl_easy_perform(curl);
 
-    // We can actually get the HTTP response code from cURL, so let's do so to check for errors.
-    http_code = 0;
-
     // This will put the HTTP response code into the "http_code" variable.
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-    /*
-     *  The iSENSE API gives us one response code to check against:
-     *  Success: 200 OK
-     *  Failure: 404 Not Found
-     */
-
-    // If we do not get a code 200, or cURL quits for some reason, we didn't successfully
-    // get the project's fields.
-    if(http_code != 200) {
-      std::cerr << "\nGET project fields failed.\n";
-      std::cerr << "Is the project ID you entered valid?\n";
-
-      // Clean up cURL and close the memfile
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-      memfclose(json_file);
-
-      return false;
-    }
-
-    // We got a code 200, so try and parse the JSON into a PICOJSON object.
-    // Error checking for the parsing occurs below.
-    string errors;
-
-    // This will parse the JSON file.
-    parse(get_data, json_file->data, json_file->data + json_file->size, &errors);
-
-    // If we have errors, print them out and quit.
-    if(errors.empty() != true) {
-      std::cerr << "\nError parsing JSON file in method: get_project_fields()\n";
-      std::cerr << "Error was: " << errors;
-      return false;
-    }
-
-    // Save the fields to the field array
-    fields = get_data.get("fields");
-    fields_array = fields.get<array>();
   }
+
+  /*
+    *  The iSENSE API gives us one response code to check against:
+    *  Success: 200 OK
+    *  Failure: 404 Not Found
+    */
+
+  // If we don't get a code 200, return false.
+  if (http_code != 200) {
+    std::cerr << "Error in method: get_project_fields()\n";
+    std::cerr << "GET project fields failed.\n";
+    std::cerr << "Is the project ID you entered valid?\n";
+
+    // Clean up cURL and close the memfile
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    memfclose(json_file);
+
+    return false;
+  }
+
+  // We got a code 200, so try and parse the JSON into a PICOJSON object.
+  // Error checking for the parsing occurs below.
+  std::string errors;
+
+  // This will parse the JSON file.
+  parse(get_data, json_file->data,
+        json_file->data + json_file->size, &errors);
+
+  // If we have errors, print them out and quit.
+  if (errors.empty() != true) {
+    std::cerr << "\nError parsing JSON file in method: get_project_fields()\n";
+    std::cerr << "Error was: " << errors;
+    return false;
+  }
+
+  // Save the fields to the field array
+  fields = get_data.get("fields");
+  fields_array = fields.get<array>();
 
   // Clean up cURL and close the memfile
   curl_easy_cleanup(curl);
@@ -453,12 +443,12 @@ bool iSENSE::get_project_fields()
 // makes a GET request and saves all the datasets & media objects
 // into two picojson arrays.
 // It will also update the fields for that given project ID
-bool iSENSE::get_datasets_and_mediaobjects()
-{
+bool iSENSE::get_datasets_and_mediaobjects() {
   // Check that the project ID is set properly.
   // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: get_datasets_and_mediaobjects()\n";
+    std::cerr << "\nPlease set a project ID!\n";
     return false;
   }
 
@@ -471,85 +461,82 @@ bool iSENSE::get_datasets_and_mediaobjects()
   // This project will try using CURL to make a basic GET request to rSENSE
   // It will then save the JSON it recieves into a picojson object.
   CURL *curl = curl_easy_init();      // cURL object
-  long http_code;                     // HTTP status code
+  long http_code = 0;                     // HTTP status code
   MEMFILE* json_file = memfopen();    // Writing JSON to this file.
   char error[256];                    // Errors get written here
 
-  if(curl)
-  {
+  if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error);    // Write errors to the array "error"
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error);
 
-    // From the picojson example, "github-issues.cc". Used  for writing the JSON to a file.
+    // From the picojson example, "github-issues.cc".
+    // Used  for writing the JSON to a file.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memfwrite);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, json_file);
 
     // Perform the request, res will get the return code
     curl_easy_perform(curl);
 
-    // We can actually get the HTTP response code from cURL, so let's do so to check for errors.
-    http_code = 0;
-
     // This will put the HTTP response code into the "http_code" variable.
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
-    /*
-     *  The iSENSE API gives us one response code to check against:
-     *  Success: 200 OK
-     *  Failure: 404 Not Found
-     */
-
-    // If we do not get a code 200, or cURL quits for some reason, we didn't successfully
-    // get the project's fields.
-    if(http_code != 200) {
-      std::cerr << "\nGET project fields failed.\n";
-      std::cerr << "Is the project ID you entered valid?\n";
-
-      // Clean up cURL and close the memfile
-      curl_easy_cleanup(curl);
-      curl_global_cleanup();
-      memfclose(json_file);
-
-      return false;
-    }
-
-    // We got a code 200, so try and parse the JSON into a PICOJSON object.
-    // Error checking for the parsing occurs below.
-    string errors;
-
-    // This will parse the JSON file.
-    parse(get_data, json_file->data, json_file->data + json_file->size, &errors);
-
-    // If we have errors, print them out and quit.
-    if(errors.empty() != true) {
-      std::cerr << "\nError parsing JSON file in method: get_datasets_and_mediaobjects()\n";
-      std::cerr << "Error was: " << errors;
-      return false;
-    }
-
-    // Save the fields to the field array
-    fields = get_data.get("fields");
-    fields_array = fields.get<array>();
-
-    // Save the datasets to the datasets array
-    value temp = get_data.get("dataSets");
-    data_sets = temp.get<array>();
-
-    // Save the media objects to the media objects array
-    value temp2 = get_data.get("mediaObjects");
-    media_objects = temp2.get<array>();
-
-    // Save the owner info.
-    value temp3 = get_data.get("owner");
-    owner_info = temp3.get<object>();
   }
+
+  /*
+    *  The iSENSE API gives us one response code to check against:
+    *  Success: 200 OK
+    *  Failure: 404 Not Found
+    */
+
+  // If we do not get a code 200, or cURL quits for some reason,
+  // we didn't successfully get the project's fields.
+  if (http_code != 200) {
+    std::cerr << "\nError in: get_datasets_and_mediaobjects().\n";
+    std::cerr << "GET project fields failed.\n";
+    std::cerr << "Is the project ID you entered valid?\n";
+
+    // Clean up cURL and close the memfile
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    memfclose(json_file);
+
+    return false;
+  }
+
+  // We got a code 200, so try and parse the JSON into a PICOJSON object.
+  // Error checking for the parsing occurs below.
+  std::string errors;
+
+  // This will parse the JSON file.
+  parse(get_data, json_file->data, json_file->data + json_file->size, &errors);
+
+  // If we have errors, print them out and quit.
+  if (errors.empty() != true) {
+    std::cerr << "\nError in method: get_datasets_and_mediaobjects()\n";
+    std::cerr << "Parsing JSON file failed. Error was: " << errors;
+    return false;
+  }
+
+  // Save the fields to the field array
+  fields = get_data.get("fields");
+  fields_array = fields.get<array>();
+
+  // Save the datasets to the datasets array
+  value temp = get_data.get("dataSets");
+  data_sets = temp.get<array>();
+
+  // Save the media objects to the media objects array
+  value temp2 = get_data.get("mediaObjects");
+  media_objects = temp2.get<array>();
+
+  // Save the owner info.
+  value temp3 = get_data.get("owner");
+  owner_info = temp3.get<object>();
 
   // Clean up cURL and close the memfile
   curl_easy_cleanup(curl);
   curl_global_cleanup();
   memfclose(json_file);
 
-  // If we have both a title and project ID, we can grab the dataset ID from the get data.
   return true;
 }
 
@@ -557,43 +544,44 @@ bool iSENSE::get_datasets_and_mediaobjects()
 // Calls the get_datasets function, returns a vector of the data
 // Must be given a valid iSENSE dataset name & field name
 // Must have a project ID set.
-vector<string> iSENSE::get_dataset(string dataset_name, string field_name) {
-  vector<string> vector_data;
+std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
+                                             std::string field_name) {
+  std::vector<std::string> vector_data;
 
   // Make sure a valid project ID has been set
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\n\nError in method: get_dataset(string, string)\n";
+    std::cerr << "Please set a project ID!\n";
     return vector_data;
   }
 
   // First call get_datasets_and_mediaobjects() and see if that is sucessful.
-  if(!get_datasets_and_mediaobjects()) {
+  if (!get_datasets_and_mediaobjects()) {
     // We failed. Let the user know, and return an empty map.
-    std::cerr << "\n\nFailed to get datasets.\n";
+    std::cerr << "\n\nError in method: get_dataset(string, string)\n";
+    std::cerr << "Failed to get datasets.\n";
     return vector_data;
   }
 
-  // If we get here, we can try and find the field name, and return a vector of data for that
-  // field name.
+  // If we get here, we can try and find the field name,
+  // and return a vector of data for that field name.
   array::iterator it, the_begin, the_end;
 
   the_begin = data_sets.begin();
   the_end = data_sets.end();
 
   // Check and see if the data_sets array is empty
-  if(the_begin == the_end) {
-    // Print an error and quit, we can't make a vector of project titles to return
-    // if the JSON array ended up empty. Probably wasn't any projects with that search term.
-    std::cerr << "\nDatasets array is empty.\n";
-
+  if (the_begin == the_end) {
+    std::cerr << "\n\nError in method: get_dataset(string, string)\n";
+    std::cerr << "Datasets array is empty.\n";
     return vector_data;  // this is an empty vector
   }
 
-  string dataset_ID = get_Dataset_ID(dataset_name);
-  string field_ID = get_Field_ID(field_name);
+  std::string dataset_ID = get_Dataset_ID(dataset_name);
+  std::string field_ID = get_Field_ID(field_name);
 
   // If either dataset ID or field ID threw an error, quit.
-  if(dataset_ID == GET_ERROR || field_ID == GET_ERROR) {
+  if (dataset_ID == GET_ERROR || field_ID == GET_ERROR) {
     std::cerr << "\n\nUnable to return a vector of data.\n";
     std::cerr << "Either the dataset / field names are incorrect, \n";
     std::cerr << "Or the project ID is wrong.\n";
@@ -601,32 +589,30 @@ vector<string> iSENSE::get_dataset(string dataset_name, string field_name) {
     return vector_data;
   }
 
-  // If we make here, we can make a vector containing data points and return that to the user.
+  // If we make here, we can make a vector containing
+  // data points and return that to the user.
 
-  /*
-   * Note on why there's 3 for loops:
-   * First for loop goes through all datasets in the project and looks for one with the dataset
-   * name we found above.
-   * At that point, we have the object containing all the info about that dataset.
-   * The second for loop then goes through the info object and looks for the array
-   * of data points for this dataset.
-   * The final for loop goes through this array and grabs all the data points with the above
-   * field ID (field name) and stores these data points into a vector, which is then
-   * returned to the user.
-   *
+  /* Note on why there's 3 for loops:
+   * First for loop goes through all datasets in the project and
+   * looks for one with the dataset name we found above.
+   * We then have the object containing all the info about that dataset.
+   * The second for loop then goes through the info object and
+   * looks for the array of data points for this dataset.
+   * The final for loop goes through this array and grabs
+   * all the data points with the above field ID (field name) and
+   * stores these data points into a vector, which is then returned to the user.
    */
 
   // This outer for loop is for going through all datasets in the project
-  for(it = data_sets.begin(); it != data_sets.end(); it++) {
+  for (it = data_sets.begin(); it != data_sets.end(); it++) {
     // Get the current object
     object obj = it->get<object>();
 
     // Get that object's dataset ID to compare against
-    string id = obj["id"].to_str();
+    std::string id = obj["id"].to_str();
 
-    // If we have the right object, sweet!
-    if(id == dataset_ID)  // We can now start looking for the data array
-    {
+    // If we have the right object, we can now start looking for the data array
+    if (id == dataset_ID) {
       // obtain a const reference to the map (as seen on picoJSON github page)
       const object& cur_obj = it->get<object>();
 
@@ -634,18 +620,18 @@ vector<string> iSENSE::get_dataset(string dataset_name, string field_name) {
       for (object::const_iterator i = cur_obj.begin();
            i != cur_obj.end(); i++) {
         // When we get here, we've found the data array! WOO HOO!
-        if(i->first == "data") {
+        if (i->first == "data") {
           // Now we need one final for loop to go through the array,
           // and push_back just the data points for our field name
           // (using the field ID we found above)
           array dataset_list = i->second.get<array>();
 
-          for(array::iterator iter = dataset_list.begin();
+          for (array::iterator iter = dataset_list.begin();
               iter != dataset_list.end(); iter++) {
-            // We make some tmp objects for getting datapoints, since the dataset
-            // array for each dataset stores objects for each data point
+            // We make some tmp objects for getting datapoints, since the
+            // dataset array for each dataset stores objects for each data point
             object tmp_obj = iter->get<object>();
-            string data_pt = tmp_obj[field_ID].to_str();
+            std::string data_pt = tmp_obj[field_ID].to_str();
             vector_data.push_back(data_pt);
           }
 
@@ -657,77 +643,95 @@ vector<string> iSENSE::get_dataset(string dataset_name, string field_name) {
     }
   }
 
-  // Note: should we not find the data we're looking for, this vector should be empty!
-  // Users should check the vector to make sure it is not empty & look for any error
-  // messages that are printed.
-  // Also note - if we get here, then we failed somewhere above since we should have
-  // returned a vector of data points.
-  std::cerr << "\n\nFailed to get data points. Check the following & make sure they are correct:\n";
+  /* Note: should we not find the data we're looking for, this vector is empty.
+   * Users should check the vector to make sure it is not empty &
+   * look for any error messages that are printed.
+   * Also note - if we get here, then we failed somewhere above
+   * since we should have returned a vector of data points.
+   */
+  std::cerr << "\n\nError in method: get_dataset(string, string)\n";
+  std::cerr << "Failed to get data points. \n";
+  std::cerr << "Check the following & make sure they are correct:\n";
   std::cerr << "field name, dataset name, project ID\n";
-  std::cerr << "(picoJSON may also have failed at some point.)\n";
 
   return vector_data;
 }
 
 
-std::string iSENSE::get_Field_ID(string field_name) {
+std::string iSENSE::get_Field_ID(std::string field_name) {
   // Grab all the fields using an iterator.
   // Similar to printing them all out below in the debug function.
   array::iterator it;
 
   // Check and see if the fields object is empty
-  if(fields.is<picojson::null>() == true) {
-    // Print an error and quit, we can't do anything if the field array wasn't set up correctly.
-    std::cerr << "\nError - field array wasn't set up.";
+  if (fields.is<picojson::null>() == true) {
+    // Print an error and quit, we can't do anything if
+    // the field array wasn't set up correctly.
+    std::cerr << "\nError in method: get_Field_ID()\n";
+    std::cerr << "Field array wasn't set up.";
     std::cerr << "Have you pulled the fields off iSENSE?\n";
     return GET_ERROR;
   }
 
   // We made an iterator above, that will let us run through the fields
-  for(it = fields_array.begin(); it != fields_array.end(); it++) {
+  for (it = fields_array.begin(); it != fields_array.end(); it++) {
     // Get the current object
     object obj = it->get<object>();
 
     // Grab the field ID and save it in a string/
-    string field_ID = obj["id"].to_str();
+    std::string field_ID = obj["id"].to_str();
 
     // Grab the field name
-    string name = obj["name"].get<string>();
+    std::string name = obj["name"].get<std::string>();
 
     // See if we can find the field name in this project
-    if(name == field_name) {
+    if (name == field_name) {
       return field_ID;
     }
   }
 
+  std::cerr << "\nError in method: get_Field_ID()\n";
+  std::cerr << "Unable to find the field ID for the given field name.\n";
+  std::cerr << "Did you spell the field name right?\n";
   return GET_ERROR;
 }
 
 
-std::string iSENSE::get_Dataset_ID(string dataset_name) {
-  // Now compare the dataset name that the user provided with datasets in the project.
+std::string iSENSE::get_Dataset_ID(std::string dataset_name) {
+  // Compare the dataset name the user provided with datasets in the project.
   // Use an iterator to go through all the datasets
   array::iterator it;
 
+  // Check and see if the datasets object is empty
+  if (data_sets.is<picojson::null>() == true) {
+    // Print an error and quit, we can't do anything if
+    // the field array wasn't set up correctly.
+    std::cerr << "\nError in method: get_Dataset_ID()\n";
+    std::cerr << "Dataset array wasn't set up.";
+    std::cerr << "Have you pulled the fields off iSENSE?\n";
+    return GET_ERROR;
+  }
+
   // We made an iterator above, that will let us run through the fields
-  for(it = data_sets.begin(); it != data_sets.end(); it++) {
+  for (it = data_sets.begin(); it != data_sets.end(); it++) {
     // Get the current object
     object obj = it->get<object>();
 
     // Grab the dataset ID and save it in a string
-    string ID = obj["id"].to_str();
+    std::string Dataset_ID = obj["id"].to_str();
 
     // Grab the dataset name
-    string name = obj["name"].get<string>();
+    std::string name = obj["name"].get<std::string>();
 
-    // Compare this current name against the dataset name that was passed into this method.
-    if(name == dataset_name) {
+    if (name == dataset_name) {
       // We found the name, so return the dataset ID
-      return ID;
+      return Dataset_ID;
     }
   }
 
-  // If we get here, we failed to find the dataset name in this project.
+  std::cerr << "\nError in method: get_Dataset_ID()\n";
+  std::cerr << "Unable to find the dataset ID for the given dataset name.\n";
+  std::cerr << "Did you spell the dataset name right?\n";
   return GET_ERROR;
 }
 
@@ -735,131 +739,142 @@ std::string iSENSE::get_Dataset_ID(string dataset_name) {
 // Call this function to POST data to rSENSE
 bool iSENSE::post_json_key() {
   /*
-   *  These first couple of if statements perform some basic error checking, such as
-   *  whether or not all the required fields have been set up.
+   *  These first couple of if statements perform some basic error checking,
+   *  such as whether or not all the required fields have been set up.
    */
 
   // Check that the project ID is set properly.
   // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: post_json_key()\n";
+    std::cerr << "Please set a project ID!\n";
     return false;
   }
 
   // Check that a title and contributor key has been set.
-  if(title == "title" || title.empty()) {
-    std::cerr << "\nError - please set a project title!\n";
+  if (title == "title" || title.empty()) {
+    std::cerr << "\nError in method: post_json_key()\n";
+    std::cerr << "\nPlease set a project title!\n";
     return false;
   }
 
-  if(contributor_key.empty()) {
-    std::cerr << "\nErrror - please set a contributor key!\n";
+  if (contributor_key.empty()) {
+    std::cerr << "\nError in method: post_json_key()\n";
+    std::cerr << "\nPlease set a contributor key!\n";
     return false;
   }
 
   // If a label wasn't set, automatically set it to "cURL"
-  if(contributor_label == "label" || contributor_label.empty()) {
+  if (contributor_label == "label" || contributor_label.empty()) {
     contributor_label = "cURL";
   }
 
   // Make sure the map actually has stuff pushed to it.
-  if(map_data.empty()) {
-    std::cerr << "\nMap of keys/data is empty. You should push some data back to this object.\n";
+  if (map_data.empty()) {
+    std::cerr << "\nError in method: post_json_key()\n";
+    std::cerr << "Map of keys/data is empty.\n";
+    std::cerr << "Please push some data back to this object.\n";
     return false;
   }
 
-  // Should make sure each vector is not empty as well, since I had issues uploading
-  // if any ONE vector was empty. rSENSE complained about the nil class.
+  // Should make sure each vector is not empty as well, since I had issues
+  // uploading if any ONE vector was empty. rSENSE complained about a nil class.
 
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
 
-  // Call the POST function, give it type 1 since this is a upload JSON by contributor key.
+  // Call the POST function, give it type 1
+  // since this is a upload JSON by contributor key.
   int http_code = post_data_function(POST_KEY);
 
   /*
   *  The iSENSE API gives us two response codes to check against:
   *  Success: 200 OK (iSENSE handled the request fine)
-  *  Failure: 401 Unauthorized (email / password or contributor key was not valid)
+  *  Failure: 401 Unauthorized (email/pw or contributor key was not valid)
   *  Failure: 422 Unprocessable Entity (email or contributor key was fine,
   *           but there was an issue with the request's formatting.
   *           Something in the formatting caused iSENSE to fail.)
   */
 
-  if(http_code == 200) {
-    cout << "\n\nPOST request successfully sent off to iSENSE!\n";
-    cout << "HTTP Response Code was: " << http_code << endl;
-    cout << "The URL to your project is: " << dev_baseURL << "/projects/" << project_ID << endl;
+  if (http_code == 200) {
+    std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
+    std::cout << "HTTP Response Code was: " << http_code << "\n";
+    std::cout << "The URL to your project is: " << dev_baseURL;
+    std::cout << "/projects/" << project_ID << "\n";
     return true;
-  } else {
-    std::cerr << "\n\nPOST request **failed**\n";
-    std::cerr << "HTTP Response Code was: " << http_code << endl;
+  }
 
-    if(http_code == 401) {
-      std::cerr << "\n\nTry checking to make sure your contributor key is valid\n";
-      std::cerr << "for the project you are trying to contribute to.\n";
-    }
-    if(http_code == 404) {
-      std::cerr << "\n\nUnable to find that project ID.\n";
-    }
-    if(http_code == 422) {
-      std::cerr << "\n\nSomething went wrong with iSENSE.\n";
-      std::cerr << "Try formatting your data differently,\n";
-      std::cerr << "using an email & password instead of a contributor key,\n";
-      std::cerr << "or asking for help from others. You can also try running the\n";
-      std::cerr << "the program with the \"debug\" method enabled, by typing: \n";
-      std::cerr << "object_name.debug()\n";
-      std::cerr << "This will output a ton of data to the console and may help you in\n";
-      std::cerr << "debugging your program.\n";
-    }
-    if(http_code == CURL_ERROR) {
-      std::cerr << "\n\nCurl failed for some unknown reason.\n";
-      std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
-      std::cerr << "picojson header file as well.\n";
-    }
+  std::cerr << "\n\nError in method: post_json_key()\n";
+  std::cerr << "POST request **failed**\n";
+  std::cerr << "HTTP Response Code was: " << http_code;
+
+  // Make a function for this!
+  if (http_code == 401) {
+    std::cerr << "Try checking to make sure your contributor key is valid\n";
+    std::cerr << "for the project you are trying to contribute to.\n";
+  }
+  if (http_code == 404) {
+    std::cerr << "Unable to find that project ID.\n";
+  }
+  if (http_code == 422) {
+    std::cerr << "Something went wrong with iSENSE.\n";
+    std::cerr << "Try formatting your data differently, using a contributor \n";
+    std::cerr << "key instead of an email, or asking for help from others. \n";
+    std::cerr << "You can also try running the the program with the debug \n";
+    std::cerr << "method enabled, by typing: object_name.debug()\n";
+    std::cerr << "This will output a ton of data to the console and \n";
+    std::cerr << "may help you in debugging your program.\n";
+  }
+  if (http_code == CURL_ERROR) {
+    std::cerr << "Curl failed for some unknown reason.\n";
+    std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
+    std::cerr << "picojson header file as well.\n";
   }
 
   return false;
 }
 
 
-/*    Append to a dataset using its dataset_ID.
- *    The dataset ID can be found on iSENSE by going to a project and clicking on
- *    a dataset.
- *    In the future, uploading JSON will return the dataset ID for this function
- *    (assuming iSENSE allows that)
+/*  Append to a dataset using its dataset_ID.
+ *  The dataset ID can be found on iSENSE by going to a project
+ *  and clicking on a dataset.
+ *  In the future, uploading JSON will return the dataset ID for this function
  */
-bool iSENSE::append_key_byID(string dataset_ID) {
-  /*
-   *  These first couple of if statements perform some basic error checking, such as
-   *  whether or not all the required fields have been set up.
+bool iSENSE::append_key_byID(std::string dataset_ID) {
+  /*  These first couple of if statements perform some basic error checking,
+   *  such as whether or not all the required fields have been set up.
    */
 
   // Check that the project ID is set properly.
   // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: append_key_byID()\n";
+    std::cerr << "Please set a project ID!\n";
     return false;
   }
 
   // Check that a title and contributor key has been set.
-  if(title == "title" || title.empty()) {
-    std::cerr << "\nError - please set a project title!\n";
+  if (title == "title" || title.empty()) {
+    std::cerr << "\nError in method: append_key_byID()\n";
+    std::cerr << "Please set a project title!\n";
     return false;
   }
 
-  if(contributor_key.empty()) {
-    std::cerr << "\nErrror - please set a contributor key!\n";
+  if (contributor_key == "key" || contributor_key.empty()) {
+    std::cerr << "\nError in method: append_key_byID()\n";
+    std::cerr << "Please set a contributor key!\n";
     return false;
   }
 
   // If a label wasn't set, automatically set it to "cURL"
-  if(contributor_label == "label" || contributor_label.empty()) {
+  if (contributor_label == "label" || contributor_label.empty()) {
     contributor_label = "cURL";
   }
 
   // Make sure the map actually has stuff pushed to it.
-  if(map_data.empty()) {
-    std::cerr << "\nMap of keys/data is empty. You should push some data back to this object.\n";
+  if (map_data.empty()) {
+    std::cerr << "\nError in method: append_key_byID()\n";
+    std::cerr << "Map of keys/data is empty.\n"
+    std::cerr << "You should push some data back to this object.\n";
     return false;
   }
 
@@ -869,47 +884,52 @@ bool iSENSE::append_key_byID(string dataset_ID) {
   // Set the append API URL
   upload_URL = devURL + "/data_sets/append";
 
-  // Call the POST function, give it type 2 since this is an append by contributor key.
+  // Call the POST function, give it type 2
+  // since this is an append by contributor key.
   int http_code = post_data_function(APPEND_KEY);
 
    /*
     *  The iSENSE API gives us two response codes to check against:
     *  Success: 200 OK (iSENSE handled the request fine)
-    *  Failure: 401 Unauthorized (email / password or contributor key was not valid)
+    *  Failure: 401 Unauthorized (email/pw or contributor key was not valid)
     *  Failure: 422 Unprocessable Entity (email or contributor key was fine,
     *           but there was an issue with the request's formatting.
     *           Something in the formatting caused iSENSE to fail.)
     */
 
-  if(http_code == 200) {
-    cout << "\n\nPOST request successfully sent off to iSENSE!\n";
-    cout << "HTTP Response Code was: " << http_code << endl;
-    cout << "The URL to your project is: " << dev_baseURL << "/projects/" << project_ID << endl;
+  if (http_code == 200) {
+    std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
+    std::cout << "HTTP Response Code was: " << http_code << "\n";
+    std::cout << "The URL to your project is: " << dev_baseURL;
+    std::cout << "/projects/" << project_ID << "\n";
     return true;
   }
-  else {
-    std::cerr << "\n\nPOST request **failed**\n";
-    std::cerr << "HTTP Response Code was: " << http_code << endl;
 
-    if(http_code == 401) {
-      std::cerr << "Try checking to make sure your contributor key is valid\n";
-      std::cerr << "for the project you are trying to contribute to.\n";
-    }
-    if(http_code == 422) {
-      std::cerr << "Something went wrong with iSENSE.\n";
-      std::cerr << "Try formatting your data differently,\n";
-      std::cerr << "using an email & password instead of a contributor key,\n";
-      std::cerr << "or asking for help from others. You can also try running the\n";
-      std::cerr << "the program with the \"debug\" method enabled, by typing: \n";
-      std::cerr << "object_name.debug()\n";
-      std::cerr << "This will output a ton of data to the console and may help you in\n";
-      std::cerr << "debugging your program.\n";
-    }
-    if(http_code == CURL_ERROR) {
-      std::cerr << "\n\nCurl failed for some unknown reason.\n";
-      std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
-      std::cerr << "picojson header file as well.\n";
-    }
+  std::cerr << "\n\nError in method: append_key_byID()\n";
+  std::cerr << "POST request **failed**\n";
+  std::cerr << "HTTP Response Code was: " << http_code << "\n";
+
+  // Make a function for this!
+  if (http_code == 401) {
+    std::cerr << "Try checking to make sure your contributor key is valid\n";
+    std::cerr << "for the project you are trying to contribute to.\n";
+  }
+  if (http_code == 404) {
+    std::cerr << "Unable to find that project ID.\n";
+  }
+  if (http_code == 422) {
+    std::cerr << "Something went wrong with iSENSE.\n";
+    std::cerr << "Try formatting your data differently, using a contributor \n";
+    std::cerr << "key instead of an email, or asking for help from others. \n";
+    std::cerr << "You can also try running the the program with the debug \n";
+    std::cerr << "method enabled, by typing: object_name.debug()\n";
+    std::cerr << "This will output a ton of data to the console and \n";
+    std::cerr << "may help you in debugging your program.\n";
+  }
+  if (http_code == CURL_ERROR) {
+    std::cerr << "Curl failed for some unknown reason.\n";
+    std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
+    std::cerr << "picojson header file as well.\n";
   }
 
   return false;
@@ -917,62 +937,68 @@ bool iSENSE::append_key_byID(string dataset_ID) {
 
 
 /*
- *    Appends to a dataset using its dataset name, which can be used to find a dataset ID
- *    We can find the dataset ID by comparing against all the datasets in a given project
- *    until we find the dataset with the given name.
+ *  Appends to a dataset using its dataset name, which can
+ *  be used to find a dataset ID
+ *  We can find the dataset ID by comparing against all the datasets
+ *  in a given project until we find the dataset with the given name.
  *
  */
-bool iSENSE::append_key_byName(string dataset_name) {
-  /*
-   *  These first couple of if statements perform some basic error checking, such as
-   *  whether or not all the required fields have been set up.
+bool iSENSE::append_key_byName(std::string dataset_name) {
+  /*  These first couple of if statements perform some basic error checking,
+   *  such as whether or not all the required fields have been set up.
    */
 
   // Check that the project ID is set properly.
   // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: append_key_byName()\n";
+    std::cerr << "Please set a project ID!\n";
     return false;
   }
 
   // Check that a title and contributor key has been set.
-  if(title == "title" || title.empty()) {
-    std::cerr << "\nError - please set a project title!\n";
+  if (title == "title" || title.empty()) {
+    std::cerr << "\nError in method: append_key_byName()\n";
+    std::cerr << "Please set a project title!\n";
     return false;
   }
 
-  if(contributor_key.empty()) {
-    std::cerr << "\nErrror - please set a contributor key!\n";
+  if (contributor_key == "key" || contributor_key.empty()) {
+    std::cerr << "\nError in method: append_key_byName()\n";
+    std::cerr << "Please set a contributor key!\n";
     return false;
   }
 
   // If a label wasn't set, automatically set it to "cURL"
-  if(contributor_label == "label" || contributor_label.empty()) {
+  if (contributor_label == "label" || contributor_label.empty()) {
     contributor_label = "cURL";
   }
 
   // Make sure the map actually has stuff pushed to it.
-  if(map_data.empty()) {
-    std::cerr << "\nMap of keys/data is empty. You should push some data back to this object.\n";
+  if (map_data.empty()) {
+    std::cerr << "\nError in method: append_key_byName()\n";
+    std::cerr << "Map of keys/data is empty.\n";
+    std::cerr << "You should push some data back to this object.\n";
     return false;
   }
 
-  // We can now find the dataset ID by comparing against all the datasets in this project.
-  // First pull down the datasets
-  get_datasets_and_mediaobjects();
+  // We can now find the dataset ID by comparing
+  // against all the datasets in this project.
+  get_datasets_and_mediaobjects();    // First pull down the datasets
 
   // Call the get_dataset_ID function
-  string dataset_ID = get_Dataset_ID(dataset_name);
+  std::string dataset_ID = get_Dataset_ID(dataset_name);
 
   // If we didn't get any errors, call the append by ID function.
-  if(dataset_ID != GET_ERROR) {
+  if (dataset_ID != GET_ERROR) {
     append_key_byID(dataset_ID);
     return true;
   }
 
   // If we got here, we failed to find that dataset name in the current project.
-  cout << "Failed to find the dataset name in project # " << project_ID << endl;
-  cout << "Make sure to type the exact name, as it appears on iSENSE. \n";
+  std::cerr << "\nError in method: append_key_byName()\n";
+  std::cerr << "Failed to find the dataset name in project # " << project_ID;
+  std::cerr << "\nMake sure to type the exact name, as it appears on iSENSE.\n";
   return false;
 }
 
@@ -980,92 +1006,98 @@ bool iSENSE::append_key_byName(string dataset_name) {
 // Post using a email / password
 bool iSENSE::post_json_email() {
   /*
-   *        These first couple of if statements perform some basic error checking, such as
-   *        whether or not all the required fields have been set up.
+   *  These first couple of if statements perform some basic error checking,
+   *  such as whether or not all the required fields have been set up.
    */
 
   // Check that the project ID is set properly.
   // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: post_json_email()\n";
+    std::cerr << "Please set a project ID!\n";
     return false;
   }
 
   // Check that a title and contributor key has been set.
-  if(title == "title" || title.empty()) {
-    std::cerr << "\nError - please set a project title!\n";
+  if (title == "title" || title.empty()) {
+    std::cerr << "\nError in method: post_json_email()\n";
+    std::cerr << "Please set a project title!\n";
     return false;
   }
 
-  if(email == "email" || email.empty()) {
-    std::cerr << "\nErrror - please set an email address!\n";
+  if (email == "email" || email.empty()) {
+    std::cerr << "\nError in method: post_json_email()\n";
+    std::cerr << "Please set an email address!\n";
     return false;
   }
 
-  if(password == "password" || password.empty()) {
-    std::cerr << "\nErrror - please set a password!\n";
+  if (password == "password" || password.empty()) {
+    std::cerr << "\nError in method: post_json_email()\n";
+    std::cerr << "Please set a password!\n";
     return false;
   }
 
   // If a label wasn't set, automatically set it to "cURL"
-  if(contributor_label == "label" || contributor_label.empty()) {
+  if (contributor_label == "label" || contributor_label.empty()) {
     contributor_label = "cURL";
   }
 
   // Make sure the map actually has stuff pushed to it.
-  if(map_data.empty()) {
-    std::cerr << "\nMap of keys/data is empty. You should push some data back to this object.\n";
+  if (map_data.empty()) {
+    std::cerr << "\nError in method: post_json_email()\n";
+    std::cerr << "Map of keys/data is empty.\n"
+    std::cerr << "You should push some data back to this object.\n";
     return false;
   }
 
-  // Should make sure each vector is not empty as well, since I had issues uploading
-  // if any ONE vector was empty. rSENSE complained about the nil class.
+  // Should make sure each vector is not empty as well, since I had issues
+  // uploading if any ONE vector was empty. rSENSE complained about a nil class.
 
   // Make sure to set the upload URL!
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
 
-  // Call the POST function, give it type 3 since this is upload JSON by email & password.
+  // Call the POST function, give it type 3
+  // since this is upload JSON by email & password.
   int http_code = post_data_function(POST_EMAIL);
 
   /*
     *  The iSENSE API gives us two response codes to check against:
     *  Success: 200 OK (iSENSE handled the request fine)
-    *  Failure: 401 Unauthorized (email / password or contributor key was not valid)
+    *  Failure: 401 Unauthorized (email or contributor key was not valid)
     *  Failure: 422 Unprocessable Entity (email or contributor key was fine,
-    *               but there was an issue with the upload for some reason.)
-    *               the request's formatting. Something in the formatting caused iSENSE to fail.)
+    *               but there was an issue with the upload for some reason.
+    *               Something in the formatting caused iSENSE to fail.)
     */
 
-  if(http_code == 200) {
-    cout << "\n\nPOST request successfully sent off to iSENSE!\n";
-    cout << "HTTP Response Code was: " << http_code << endl;
-    cout << "The URL to your project is: " << dev_baseURL << "/projects/" << project_ID << endl;
+  if (http_code == 200) {
+    std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
+    std::cout << "HTTP Response Code was: " << http_code << "\n";
+    std::cout << "The URL to your project is: " << dev_baseURL;
+    std::cout << "/projects/" << project_ID << "\n";
     return true;
   }
-  else
-  {
-    std::cerr << "\nPOST request **failed**\n";
-    std::cerr << "HTTP Response Code was: " << http_code << endl;
+  std::cerr << "\n\nError in method: post_json_email()\n";
+  std::cerr << "POST request **failed**\n";
+  std::cerr << "HTTP Response Code was: " << http_code << "\n";
 
-    if(http_code == 401) {
-      std::cerr << "Try checking to make sure your contributor key is valid\n";
-      std::cerr << "for the project you are trying to contribute to.\n";
-    }
-    if(http_code == 422) {
-      std::cerr << "Something went wrong with iSENSE.\n";
-      std::cerr << "Try formatting your data differently,\n";
-      std::cerr << "using a contributor key instead of an email/password,\n";
-      std::cerr << "or asking for help from others. You can also try running the\n";
-      std::cerr << "the program with the \"debug\" method enabled, by typing: \n";
-      std::cerr << "object_name.debug()\n";
-      std::cerr << "This will output a ton of data to the console and may help you in\n";
-      std::cerr << "debugging your program.\n";
-    }
-    if(http_code == CURL_ERROR) {
-      std::cerr << "\n\nCurl failed for some unknown reason.\n";
-      std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
-      std::cerr << "picojson header file as well.\n";
-    }
+  // Make a function for this!
+  if (http_code == 401) {
+    std::cerr << "Try checking to make sure your contributor key is valid\n";
+    std::cerr << "for the project you are trying to contribute to.\n";
+  }
+  if (http_code == 422) {
+    std::cerr << "Something went wrong with iSENSE.\n";
+    std::cerr << "Try formatting your data differently, using a contributor \n";
+    std::cerr << "key instead of an email, or asking for help from others. \n";
+    std::cerr << "You can also try running the the program with the debug \n";
+    std::cerr << "method enabled, by typing: object_name.debug()\n";
+    std::cerr << "This will output a ton of data to the console and \n";
+    std::cerr << "may help you in debugging your program.\n";
+  }
+  if (http_code == CURL_ERROR) {
+    std::cerr << "Curl failed for some unknown reason.\n";
+    std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
+    std::cerr << "picojson header file as well.\n";
   }
 
   return false;
@@ -1073,38 +1105,42 @@ bool iSENSE::post_json_email() {
 
 
 // Post append using email and password
-bool iSENSE::append_email_byID(string dataset_ID) {
-  /*
-   *        These first couple of if statements perform some basic error checking, such as
-   *        whether or not all the required fields have been set up.
+bool iSENSE::append_email_byID(std::string dataset_ID) {
+  /*  These first couple of if statements perform some basic error checking,
+   *  such as whether or not all the required fields have been set up.
    */
 
   // Check that the project ID is set properly.
   // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: append_email_byID\n";
+    std::cerr << "Please set a project ID!\n";
     return false;
   }
 
   // Check that a title and email / password has been set.
-  if(title == "title" || title.empty()) {
-    std::cerr << "\nError - please set a project title!\n";
+  if (title == "title" || title.empty()) {
+    std::cerr << "\nError in method: append_email_byID\n";
+    std::cerr << "Please set a project title!\n";
     return false;
   }
 
-  if(email == "email" || email.empty()) {
-    std::cerr << "\nErrror - please set an email address!\n";
+  if (email == "email" || email.empty()) {
+    std::cerr << "\nError in method: append_email_byID\n";
+    std::cerr << "Please set an email address!\n";
     return false;
   }
 
-  if(password == "password" || password.empty()) {
-    std::cerr << "\nErrror - please set a password!\n";
+  if (password == "password" || password.empty()) {
+    std::cerr << "\nError in method: append_email_byID\n";
+    std::cerr << "Please set a password!\n";
     return false;
   }
 
   // Make sure the map actually has stuff pushed to it.
-  if(map_data.empty()) {
-    std::cerr << "\nMap of keys/data is empty.\n";
+  if (map_data.empty()) {
+    std::cerr << "\nError in method: append_email_byID\n";
+    std::cerr << "Map of keys/data is empty.\n";
     std::cerr << "You should push some data back to this object.\n";
     return false;
   }
@@ -1115,104 +1151,104 @@ bool iSENSE::append_email_byID(string dataset_ID) {
   // Change the upload URL to append rather than create a new dataset.
   upload_URL = devURL + "/data_sets/append";
 
-  // Call the POST function, give it type 4 since this is append JSON by email & password.
+  // Call the POST function with type 4 for appending via email.
   int http_code = post_data_function(APPEND_EMAIL);
 
   /*
     *  The iSENSE API gives us two response codes to check against:
     *  Success: 200 OK (iSENSE handled the request fine)
-    *  Failure: 401 Unauthorized (email / password or contributor key was not valid)
+    *  Failure: 401 Unauthorized (email/pw or contributor key not valid)
     *  Failure: 422 Unprocessable Entity (email or contributor key was fine,
     *               but there was an issue with the upload for some reason.)
-    *               the request's formatting. Something in the formatting caused iSENSE to fail.)
+    *               Something in the formatting caused iSENSE to fail.)
     */
 
-  if(http_code == 200) {
-    cout << "\n\nPOST request successfully sent off to iSENSE!\n";
-    cout << "HTTP Response Code was: " << http_code << endl;
-    cout << "The URL to your project is: " << dev_baseURL << "/projects/" << project_ID << endl;
+  if (http_code == 200) {
+    std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
+    std::cout << "HTTP Response Code was: " << http_code << "\n";
+    std::cout << "The URL to your project is: " << dev_baseURL;
+    std::cout << "/projects/" << project_ID << "\n";
     return true;
   }
-  else {
-    std::cerr << "\nPOST request **failed**\n";
-    std::cerr << "HTTP Response Code was: " << http_code << endl;
 
-    if(http_code == 401) {
-      std::cerr << "Try checking to make sure your contributor key is valid\n";
-      std::cerr << "for the project you are trying to contribute to.\n";
-    }
-    if(http_code == 422) {
-      std::cerr << "Something went wrong with iSENSE.\n";
-      std::cerr << "Try formatting your data differently,\n";
-      std::cerr << "using a contributor key instead of an email/password,\n";
-      std::cerr << "or asking for help from others. You can also try running the\n";
-      std::cerr << "the program with the \"debug\" method enabled, by typing: \n";
-      std::cerr << "object_name.debug()\n";
-      std::cerr << "This will output a ton of data to the console and may help you in\n";
-      std::cerr << "debugging your program.\n";
-    }
-    if(http_code == CURL_ERROR) {
-      std::cerr << "\n\nCurl failed for some unknown reason.\n";
-      std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
-      std::cerr << "picojson header file as well.\n";
-    }
+  std::cerr << "\nError in method: append_email_byID()\n";
+  std::cerr << "POST request **failed**\n";
+  std::cerr << "HTTP Response Code was: " << http_code << "\n";
+
+  // Make a function for this!
+  if (http_code == 401) {
+    std::cerr << "Try checking to make sure your contributor key is valid\n";
+    std::cerr << "for the project you are trying to contribute to.\n";
+  }
+  if (http_code == 404) {
+    std::cerr << "Unable to find that project ID.\n";
+  }
+  if (http_code == 422) {
+    std::cerr << "Something went wrong with iSENSE.\n";
+    std::cerr << "Try formatting your data differently, using a contributor \n";
+    std::cerr << "key instead of an email, or asking for help from others. \n";
+    std::cerr << "You can also try running the the program with the debug \n";
+    std::cerr << "method enabled, by typing: object_name.debug()\n";
+    std::cerr << "This will output a ton of data to the console and \n";
+    std::cerr << "may help you in debugging your program.\n";
+  }
+  if (http_code == CURL_ERROR) {
+    std::cerr << "Curl failed for some unknown reason.\n";
+    std::cerr << "Make sure you've installed curl / libcurl, and have the \n";
+    std::cerr << "picojson header file as well.\n";
   }
 
   return false;
 }
 
 
-/*
- *    Appends to a dataset using its dataset name, which can be used to find a dataset ID
- *    We can find the dataset ID by comparing against all the datasets in a given project
- *    until we find the dataset with the given name.
- *
+/*  Appends to a dataset using its dataset name.
+ *  We can find the dataset ID by comparing against all the datasets in
+ *  a given project until we find the dataset with the given name.
  */
-bool iSENSE::append_email_byName(string dataset_name) {
-  // Check that the project ID is set properly.
-  // When the ID is set, the fields are also pulled down as well.
-  if(project_ID == "empty" || project_ID.empty()) {
-    std::cerr << "\nError - please set a project ID!\n";
+bool iSENSE::append_email_byName(std::string dataset_name) {
+  if (project_ID == "empty" || project_ID.empty()) {
+    std::cerr << "\nError in method: append_email_byName\n";
+    std::cerr << "Please set a project ID!\n";
+    return false;
+  }
+  if (title == "title" || title.empty()) {
+    std::cerr << "\nError in method: append_email_byName\n";
+    std::cerr << "Please set a project title!\n";
+    return false;
+  }
+  if (email == "email" || email.empty()) {
+    std::cerr << "\nError in method: append_email_byName\n";
+    std::cerr << "Please set an email address!\n";
+    return false;
+  }
+  if (password == "password" || password.empty()) {
+    std::cerr << "\nError in method: append_email_byName\n";
+    std::cerr << "Please set a password!\n";
+    return false;
+  }
+  if (map_data.empty()) {
+    std::cerr << "\nError in method: append_email_byName\n";
+    std::cerr << "Map of keys/data is empty.\n";
+    std::cerr << "You should push some data back to this object.\n";
     return false;
   }
 
-  // Check that a title and contributor key has been set.
-  if(title == "title" || title.empty()) {
-    std::cerr << "\nError - please set a project title!\n";
-    return false;
-  }
-
-  if(email == "email" || email.empty()) {
-    std::cerr << "\nErrror - please set an email address!\n";
-    return false;
-  }
-
-  if(password == "password" || password.empty()) {
-    std::cerr << "\nErrror - please set a password!\n";
-    return false;
-  }
-
-  // Make sure the map actually has stuff pushed to it.
-  if(map_data.empty()) {
-    std::cerr << "\nMap of keys/data is empty. You should push some data back to this object.\n";
-    return false;
-  }
-
-  // We can now find the dataset ID by comparing against all the datasets in this project.
-  // First pull down the datasets
+  // We can now find the dataset ID by looking at all datasets in this project.
   get_datasets_and_mediaobjects();
 
   // Call the get_dataset_ID function
-  string dataset_ID = get_Dataset_ID(dataset_name);
+  std::string dataset_ID = get_Dataset_ID(dataset_name);
 
   // If we didn't get any errors, call the append by ID function.
-  if(dataset_ID != GET_ERROR) {
+  if (dataset_ID != GET_ERROR) {
     append_key_byID(dataset_ID);
     return true;
   }
 
   // If we got here, we failed to find that dataset name in the current project.
-  std::cerr << "Failed to find the dataset name in project # " << project_ID << endl;
+  std::cerr << "\nError in method: append_email_byName\nFailed to find";
+  std::cerr << "the dataset name in project # " << project_ID; << "\n";
   std::cerr << "Make sure to type the exact name, as it appears on iSENSE. \n";
   return false;
 }
@@ -1227,7 +1263,7 @@ void iSENSE::format_upload_string(int post_type) {
   upload_data["title"] = value(title);
 
   // This is now a switch. Future API methods can be added here.
-  switch(post_type) {
+  switch (post_type) {
     case POST_KEY:
       upload_data["contribution_key"] = value(contributor_key);
       upload_data["contributor_name"] = value(contributor_label);
@@ -1250,33 +1286,32 @@ void iSENSE::format_upload_string(int post_type) {
       break;
   }
 
-  // Add each field, with its field ID and an array of all the data in its vector.
-
+  // Add each field, with its field ID and an array of all the data.
   // Grab all the fields using an iterator.
   // Similar to printing them all out below in the debug function.
   array::iterator it;
 
   // Pointer to one of the vectors in the map
-  vector<string> *vect;
+  vector<std::string> *vect;
 
   // Check and see if the fields object is empty
-  if(fields.is<picojson::null>() == true) {
-    // Print an error and quit, we can't do anything if the field array wasn't set up correctly.
-    std::cerr << "\nError - field array wasn't set up.";
+  if (fields.is<picojson::null>() == true) {
+    std::cerr << "\nError in method: format_upload_string()\n";
+    std::cerr << "Field array wasn't set up.\n";
     std::cerr << "Have you pulled the fields off iSENSE?\n";
     return;
   }
 
   // We made an iterator above, that will let us run through the fields
-  for(it = fields_array.begin(); it != fields_array.end(); it++) {
+  for (it = fields_array.begin(); it != fields_array.end(); it++) {
     // Get the current object
     object obj = it->get<object>();
 
     // Grab the field ID and save it in a string/
-    string field_ID = obj["id"].to_str();
+    std::string field_ID = obj["id"].to_str();
 
     // Grab the field name
-    string name = obj["name"].get<string>();
+    std::string name = obj["name"].get<std::string>();
 
     // Now add all the data in that field's vector (inside the map)
     // to the fields_array object.
@@ -1292,14 +1327,14 @@ void iSENSE::format_upload_string(int post_type) {
 
 // This makes the switch above shorter,
 // since I reuse this code for all 5 types of data.
-void iSENSE::format_data(vector<string> *vect,
-                         array::iterator it, string field_ID) {
-  vector<string>::iterator x;    // For going through the vector
-  value::array data;             // Using a picojson::value::array,
-  // basically a vector but represents a json array.
+void iSENSE::format_data(vector<std::string> *vect,
+                         array::iterator it, std::string field_ID) {
+  vector<std::string>::iterator x;
+  // picojson::value::array, basically a vector but represents a json array.
+  value::array data;
 
   // First we push all the vector data into a json array.
-  for(x = vect -> begin(); x < vect -> end(); x++) {
+  for (x = vect -> begin(); x < vect -> end(); x++) {
     data.push_back(value(*x));
   }
 
@@ -1308,18 +1343,18 @@ void iSENSE::format_data(vector<string> *vect,
 }
 
 
-/*    This function is called by all of the POST functions.
- *    It must be given a parameter, an integer "type", which determines
- *    which way the JSON should be formatted in the format_upload_string function.
+/*  This function is called by all of the POST functions.
+ *  It must be given a parameter, an integer "type", which determines which
+ *  way the JSON should be formatted in the format_upload_string function.
  *
- *    Function returns an HTTP response code, like "200", "404", "503", etc.
+ *  The method returns an HTTP response code, like "200", "404", "503", etc.
  */
-int iSENSE::post_data_function(int post_type)
-{
-  // Upload_URL must have already been set. Otherwise the POST request will fail
-  // unexpectedly.
-  if(upload_URL.empty() || upload_URL == "URL") {
-    cout << "\n\nPlease set a valid upload URL.\n";
+int iSENSE::post_data_function(int post_type) {
+  // Upload_URL must have already been set.
+  // Otherwise the POST request will fail unexpectedly.
+  if (upload_URL.empty() || upload_URL == "URL") {
+    std::cerr << "\nError in method: post_data_function()\n";
+    std::cerr << "Please set a valid upload URL.\n";
     return -1;
   }
 
@@ -1330,13 +1365,16 @@ int iSENSE::post_data_function(int post_type)
    *    The below code uses cURL. It
    *    1. Sets the headers, so iSENSE knows we are sending it JSON
    *    2. Does some curl init stuff that makes the magic happen.
-   *    3. cURL sends off the request, we can grab the return code to see if cURL failed.
+   *    3. cURL sends off the request, we can grab the return code to see
+   *       if cURL failed.
    *       Also check the curl verbose debug to see why something failed.
-   *    4. We also get the HTTP status code so we know if iSENSE handled the request or not. */
+   *    4. We also get the HTTP status code so we know if iSENSE handled
+   *       the request or not.
+   */
 
   // CURL object and response code.
   CURL *curl = curl_easy_init();          // cURL object
-  long http_code;                         // HTTP status code
+  long http_code = 0;                     // HTTP status code
 
   // In windows, this will init the winsock stuff
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -1351,13 +1389,13 @@ int iSENSE::post_data_function(int post_type)
   // get a curl handle
   curl = curl_easy_init();
 
-  if(curl) {
+  if (curl) {
     // Set the URL that we will be using for our POST.
     curl_easy_setopt(curl, CURLOPT_URL, upload_URL.c_str());
 
-    // This is necessary! As I had issues with only 1 byte being sent off to iSENSE
-    // unless I made sure to make a string out of the upload_data picojson object,
-    // then with that string you can call c_str() on it below.
+    // This is necessary! As I had issues with only 1 byte being sent off
+    // to iSENSE unless I made sure to make a string out of the upload_data
+    // picojson object, then with that string you can call c_str() on it below.
     string upload_real = (value(upload_data).serialize());
 
     // POST data. Upload will be the string with all the data.
@@ -1366,12 +1404,12 @@ int iSENSE::post_data_function(int post_type)
     // JSON Headers
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    // Verbose debug output - turn this on if you are having problems. It will spit out
-    // a ton of information, such as bytes sent off, headers/access/etc.
-    // Useful to see if you formatted the data right.
-    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    // Verbose debug output - turn this on if you are having problems.
+    // It will spit out a ton of information, such as bytes sent off,
+    // headers/access/etc. Useful to see if you formatted the data right.
+    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    cout << "\nrSENSE response: \n";
+    std::cout << "\nrSENSE response: \n";
 
     // Perform the request, res will get the return code
     curl_easy_perform(curl);
@@ -1394,47 +1432,62 @@ int iSENSE::post_data_function(int post_type)
 
 // Call this function to dump all the data in the given object.
 void iSENSE::debug() {
-  cout << "\nProject Title: " << title << endl;
-  cout << "Project ID: " << project_ID << endl;
-  cout << "Dataset ID: " << dataset_ID << endl;
-  cout << "Contributor Key: " << contributor_key << endl;
-  cout << "Contributor Label: " << contributor_label << endl;
-  cout << "Email Address: " << email << endl;
-  cout << "Password: " << password << endl;
-  cout << "Upload URL: " << upload_URL << endl;
-  cout << "GET URL: " << get_URL << endl;
-  cout << "GET User URL: " << get_UserURL << "\n\n";
-  cout << "Upload string (picojson object): \n" << value(upload_data).serialize() << "\n\n";
-  cout << "Upload Fields Data (picojson object) \n" << value(fields_data).serialize() << "\n\n";
-  cout << "GET Data (picojson value): \n" << get_data.serialize() << "\n\n";
-  cout << "GET Field Data (picojson value): \n" << fields.serialize() << "\n\n";
-  cout << "GET Fields array (picojson array): \n" << value(fields_array).serialize() << "\n\n";
+  std::cout << "\nProject Title: " << title << "\n";
+  std::cout << "Project ID: " << project_ID << "\n";
+  std::cout << "Dataset ID: " << dataset_ID << "\n";
+  std::cout << "Contributor Key: " << contributor_key << "\n";
+  std::cout << "Contributor Label: " << contributor_label << "\n";
+  std::cout << "Email Address: " << email << "\n";
+  std::cout << "Password: " << password << "\n";
+  std::cout << "Upload URL: " << upload_URL << "\n";
+  std::cout << "GET URL: " << get_URL << "\n";
+  std::cout << "GET User URL: " << get_UserURL << "\n\n";
+
+  std::cout << "Upload string (picojson object): \n";
+  std::cout << value(upload_data).serialize() << "\n\n";
+
+  std::cout << "Upload Fields Data (picojson object) \n";
+  std::cout << value(fields_data).serialize() << "\n\n";
+
+  std::cout << "GET Data (picojson value): \n";
+  std::cout << get_data.serialize() << "\n\n";
+
+  std::cout << "GET Field Data (picojson value): \n";
+  std::cout << fields.serialize() << "\n\n";
+
+  std::cout << "GET Fields array (picojson array): \n";
+  std::cout << value(fields_array).serialize() << "\n\n";
 
   // This part may get huge depending on the project!
   // May want a confirm if the user actually wants to display these.
-  cout << "Datasets (picojson array): " << value(data_sets).serialize() << "\n\n";
-  cout << "Media objects (picojson array): " << value(media_objects).serialize() << "\n\n";
-  cout << "Owner info (picojson object): " << value(owner_info).serialize() << "\n\n";
+  std::cout << "Datasets (picojson array): ";
+  std::cout << value(data_sets).serialize() << "\n\n";
 
-  cout << "Map data: \n\n";
+  std::cout << "Media objects (picojson array): ";
+  std::cout << value(media_objects).serialize() << "\n\n";
+
+  std::cout << "Owner info (picojson object): ";
+  std::cout << value(owner_info).serialize() << "\n\n";
+
+  std::cout << "Map data: \n\n";
 
   // These for loops will dump all the data in the map.
   // Good for debugging.
-  for(map<string, vector<string>>::iterator it = map_data.begin();
-      it != map_data.end(); it++) {
-        cout << it->first << " ";
+  for (map<std::string, vector<std::string>>::iterator it = map_data.begin();
+       it != map_data.end(); it++) {
+        std::cout << it->first << " ";
 
-        for(vector<string>::iterator vect = (it->second).begin();
+        for (vector<std::string>::iterator vect = (it->second).begin();
             vect != (it->second).end(); vect++) {
-              cout << *vect << " ";
-            }
+              std::cout << *vect << " ";
+        }
 
-        cout << "\n";
-      }
+        std::cout << "\n";
+    }
 }
 
 
-//******************************************************************************
+//****************************************************************************
 // These are needed for picojson & libcURL.
 // Declared in memfile.h but defined below.
 MEMFILE*  memfopen() {
@@ -1447,14 +1500,12 @@ MEMFILE*  memfopen() {
 
 void memfclose(MEMFILE* mf) {
   // Double check to make sure that mf exists.
-  if(mf == NULL)
-  {
+  if (mf == NULL) {
     return;
   }
 
   // OK to free the char array
-  if (mf != NULL && mf->data)
-  {
+  if (mf != NULL && mf->data) {
     free(mf->data);
   }
 
@@ -1474,16 +1525,13 @@ size_t memfwrite(char* ptr, size_t size, size_t nmemb, void* stream) {
   MEMFILE* mf = (MEMFILE*) stream;
   int block = size * nmemb;
 
-  if (!mf->data)
-  {
+  if (!mf->data) {
     mf->data = (char*) malloc(block);
-  }
-  else {
+  } else {
     mf->data = (char*) realloc(mf->data, mf->size + block);
   }
 
-  if (mf->data)
-  {
+  if (mf->data) {
     memcpy(mf->data + mf->size, ptr, block);
     mf->size += block;
   }
