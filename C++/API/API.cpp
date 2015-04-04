@@ -703,14 +703,14 @@ std::string iSENSE::get_Dataset_ID(std::string dataset_name) {
   array::iterator it;
 
   // Check and see if the datasets object is empty
-  if (data_sets.is<picojson::null>() == true) {
-    // Print an error and quit, we can't do anything if
-    // the field array wasn't set up correctly.
-    std::cerr << "\nError in method: get_Dataset_ID()\n";
-    std::cerr << "Dataset array wasn't set up.";
-    std::cerr << "Have you pulled the fields off iSENSE?\n";
-    return GET_ERROR;
-  }
+//   if (data_sets.is<picojson::null>() == true) {
+//     // Print an error and quit, we can't do anything if
+//     // the field array wasn't set up correctly.
+//     std::cerr << "\nError in method: get_Dataset_ID()\n";
+//     std::cerr << "Dataset array wasn't set up.";
+//     std::cerr << "Have you pulled the fields off iSENSE?\n";
+//     return GET_ERROR;
+//   }
 
   // We made an iterator above, that will let us run through the fields
   for (it = data_sets.begin(); it != data_sets.end(); it++) {
@@ -873,7 +873,7 @@ bool iSENSE::append_key_byID(std::string dataset_ID) {
   // Make sure the map actually has stuff pushed to it.
   if (map_data.empty()) {
     std::cerr << "\nError in method: append_key_byID()\n";
-    std::cerr << "Map of keys/data is empty.\n"
+    std::cerr << "Map of keys/data is empty.\n";
     std::cerr << "You should push some data back to this object.\n";
     return false;
   }
@@ -1045,7 +1045,7 @@ bool iSENSE::post_json_email() {
   // Make sure the map actually has stuff pushed to it.
   if (map_data.empty()) {
     std::cerr << "\nError in method: post_json_email()\n";
-    std::cerr << "Map of keys/data is empty.\n"
+    std::cerr << "Map of keys/data is empty.\n";
     std::cerr << "You should push some data back to this object.\n";
     return false;
   }
@@ -1248,7 +1248,7 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
 
   // If we got here, we failed to find that dataset name in the current project.
   std::cerr << "\nError in method: append_email_byName\nFailed to find";
-  std::cerr << "the dataset name in project # " << project_ID; << "\n";
+  std::cerr << "the dataset name in project # " << project_ID << "\n";
   std::cerr << "Make sure to type the exact name, as it appears on iSENSE. \n";
   return false;
 }
@@ -1292,7 +1292,7 @@ void iSENSE::format_upload_string(int post_type) {
   array::iterator it;
 
   // Pointer to one of the vectors in the map
-  vector<std::string> *vect;
+  std::vector<std::string> *vect;
 
   // Check and see if the fields object is empty
   if (fields.is<picojson::null>() == true) {
@@ -1327,9 +1327,9 @@ void iSENSE::format_upload_string(int post_type) {
 
 // This makes the switch above shorter,
 // since I reuse this code for all 5 types of data.
-void iSENSE::format_data(vector<std::string> *vect,
+void iSENSE::format_data(std::vector<std::string> *vect,
                          array::iterator it, std::string field_ID) {
-  vector<std::string>::iterator x;
+  std::vector<std::string>::iterator x;
   // picojson::value::array, basically a vector but represents a json array.
   value::array data;
 
@@ -1396,7 +1396,7 @@ int iSENSE::post_data_function(int post_type) {
     // This is necessary! As I had issues with only 1 byte being sent off
     // to iSENSE unless I made sure to make a string out of the upload_data
     // picojson object, then with that string you can call c_str() on it below.
-    string upload_real = (value(upload_data).serialize());
+    std::string upload_real = (value(upload_data).serialize());
 
     // POST data. Upload will be the string with all the data.
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, upload_real.c_str());
@@ -1473,17 +1473,16 @@ void iSENSE::debug() {
 
   // These for loops will dump all the data in the map.
   // Good for debugging.
-  for (map<std::string, vector<std::string>>::iterator it = map_data.begin();
-       it != map_data.end(); it++) {
+  std::map<std::string, std::vector<std::string>>::iterator it;
+  std::vector<std::string>::iterator vect;
+  for (it = map_data.begin(); it != map_data.end(); it++) {
         std::cout << it->first << " ";
 
-        for (vector<std::string>::iterator vect = (it->second).begin();
-            vect != (it->second).end(); vect++) {
+        for (vect = (it->second).begin(); vect != (it->second).end(); vect++) {
               std::cout << *vect << " ";
         }
-
         std::cout << "\n";
-    }
+  }
 }
 
 
