@@ -1,5 +1,6 @@
 #include "include/API.h"
 
+
 // Default constructor
 iSENSE::iSENSE() {
   // Set these to default values for error checking.
@@ -36,8 +37,8 @@ void iSENSE::set_project_all(std::string proj_ID, std::string proj_title,
 }
 
 
+// Set the Project ID, and the upload/get URLs as well.
 void iSENSE::set_project_ID(std::string proj_ID) {
-  // Set the Project ID, and the upload/get URLs as well.
   project_ID = proj_ID;
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
   get_URL = devURL + "/projects/" + project_ID;
@@ -63,9 +64,10 @@ void iSENSE::set_contributor_key(std::string proj_key) {
 }
 
 
-// Users should never have to call this method, as it is possible to
-// pull datasets and compare dataset names to get the dataset_ID.
-// Users should instead use the appendbyName methods.
+/* Users should never have to call this method, as it is possible to
+ * pull datasets and compare dataset names to get the dataset_ID.
+ * Users should instead use the appendbyName methods.
+ */
 void iSENSE::set_dataset_ID(std::string proj_dataset_ID) {
   dataset_ID = proj_dataset_ID;
 }
@@ -113,12 +115,11 @@ std::string iSENSE::generate_timestamp(void) {
 
 // Resets the object and clears the map.
 void iSENSE::clear_data(void) {
-  // Set these to default values
   upload_URL = EMPTY;
   get_URL = EMPTY;
   get_UserURL = EMPTY;
   title = EMPTY;
-  project_ID = EMPTY;
+  project_ID = EMPTY;           // Set these to default values
   contributor_key = EMPTY;
   contributor_label = "label";
   email = EMPTY;
@@ -172,9 +173,9 @@ void iSENSE::push_vector(std::string field_name,
 // Searches for projects with the search term.
 // Returns a vector with projects that show up.
 std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
-  std::string get_search = devURL + "/projects?utf8=true&search=" + search_term
-                                  + "&sort=updated_at&order=DESC";
 
+  std::string get_search = devURL + "/projects?utf8=true&search=" \
+                        + search_term + "&sort=updated_at&order=DESC";
   // Vector of project titles.
   std::vector<std::string> project_titles;
 
@@ -206,6 +207,7 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
     // cout the http code.
     std::cout << "\nhttp code was: " << http_code << "\n\n";
   }
+
   /*  The iSENSE API gives us one response code to check against:
    *  Success: 200 OK
    *  If we do not get a code 200 from iSENSE, something went wrong.
@@ -233,8 +235,7 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
   value projects_json;
 
   // This will parse the JSON file.
-  parse(projects_json, json_file->data,
-        json_file->data + json_file->size, &errors);
+  parse(projects_json, json_file->data, json_file->data + json_file->size, &errors);
 
   // If we have errors, print them out and quit.
   if (errors.empty() != true) {
@@ -317,17 +318,13 @@ bool iSENSE::get_check_user() {
   long http_code = 0;                     // HTTP status code
 
   if (curl) {
-    // Set the GET URL, in this case the one be created above using the user's
-    // email & password.
+    // Set the GET URL
     curl_easy_setopt(curl, CURLOPT_URL, get_UserURL.c_str());
 
-    // Disable libcURL's desire to output to the screen by giving it a
-    // write function which basically does nothing but returns the size of what
-    // would have been outputted.
+    // Stop libcURL from outputting to stdio.
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, suppress_output);
 
-    // Perform the request
-    curl_easy_perform(curl);
+    curl_easy_perform(curl);    // Perform the request
 
     // This will put the HTTP response code into the "http_code" variable.
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
@@ -387,14 +384,12 @@ bool iSENSE::get_project_fields() {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   }
 
-  /*
-    *  The iSENSE API gives us one response code to check against:
-    *  Success: 200 OK
-    *  Failure: 404 Not Found
-    */
+  /*  The iSENSE API gives us one response code to check against:
+   *  Success: 200 OK
+   *  Failure: 404 Not Found
+   */
 
-  // If we don't get a code 200, return false.
-  if (http_code != 200) {
+  if (http_code != 200) {   // If we don't get a code 200, return false.
     std::cerr << "Error in method: get_project_fields()\n";
     std::cerr << "GET project fields failed.\n";
     std::cerr << "Is the project ID you entered valid?\n";
@@ -573,8 +568,8 @@ std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
     return vector_data;  // this is an empty vector
   }
 
-  std::string dataset_ID = get_Dataset_ID(dataset_name);
-  std::string field_ID = get_Field_ID(field_name);
+  std::string dataset_ID = get_dataset_ID(dataset_name);
+  std::string field_ID = get_field_ID(field_name);
 
   // If either dataset ID or field ID threw an error, quit.
   if (dataset_ID == GET_ERROR || field_ID == GET_ERROR) {
@@ -654,7 +649,7 @@ std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
 }
 
 
-std::string iSENSE::get_Field_ID(std::string field_name) {
+std::string iSENSE::get_field_ID(std::string field_name) {
   // Grab all the fields using an iterator.
   // Similar to printing them all out below in the debug function.
   array::iterator it;
@@ -663,7 +658,7 @@ std::string iSENSE::get_Field_ID(std::string field_name) {
   if (fields.is<picojson::null>() == true) {
     // Print an error and quit, we can't do anything if
     // the field array wasn't set up correctly.
-    std::cerr << "\nError in method: get_Field_ID()\n";
+    std::cerr << "\nError in method: get_field_ID()\n";
     std::cerr << "Field array wasn't set up.";
     std::cerr << "Have you pulled the fields off iSENSE?\n";
     return GET_ERROR;
@@ -686,14 +681,14 @@ std::string iSENSE::get_Field_ID(std::string field_name) {
     }
   }
 
-  std::cerr << "\nError in method: get_Field_ID()\n";
+  std::cerr << "\nError in method: get_field_ID()\n";
   std::cerr << "Unable to find the field ID for the given field name.\n";
   std::cerr << "Did you spell the field name right?\n";
   return GET_ERROR;
 }
 
 
-std::string iSENSE::get_Dataset_ID(std::string dataset_name) {
+std::string iSENSE::get_dataset_ID(std::string dataset_name) {
   // Compare the dataset name the user provided with datasets in the project.
   // Use an iterator to go through all the datasets
   array::iterator it;
@@ -702,7 +697,7 @@ std::string iSENSE::get_Dataset_ID(std::string dataset_name) {
 //   if (data_sets.is<picojson::null>() == true) {
 //     // Print an error and quit, we can't do anything if
 //     // the field array wasn't set up correctly.
-//     std::cerr << "\nError in method: get_Dataset_ID()\n";
+//     std::cerr << "\nError in method: get_dataset_ID()\n";
 //     std::cerr << "Dataset array wasn't set up.";
 //     std::cerr << "Have you pulled the fields off iSENSE?\n";
 //     return GET_ERROR;
@@ -725,7 +720,7 @@ std::string iSENSE::get_Dataset_ID(std::string dataset_name) {
     }
   }
 
-  std::cerr << "\nError in method: get_Dataset_ID()\n";
+  std::cerr << "\nError in method: get_dataset_ID()\n";
   std::cerr << "Unable to find the dataset ID for the given dataset name.\n";
   std::cerr << "Did you spell the dataset name right?\n";
   return GET_ERROR;
@@ -959,7 +954,7 @@ bool iSENSE::append_key_byName(std::string dataset_name) {
   get_datasets_and_mediaobjects();    // First pull down the datasets
 
   // Call the get_dataset_ID function
-  std::string dataset_ID = get_Dataset_ID(dataset_name);
+  std::string dataset_ID = get_dataset_ID(dataset_name);
 
   // If we didn't get any errors, call the append by ID function.
   if (dataset_ID != GET_ERROR) {
@@ -1182,7 +1177,7 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
   get_datasets_and_mediaobjects();
 
   // Call the get_dataset_ID function
-  std::string dataset_ID = get_Dataset_ID(dataset_name);
+  std::string dataset_ID = get_dataset_ID(dataset_name);
 
   // If we didn't get any errors, call the append by ID function.
   if (dataset_ID != GET_ERROR) {

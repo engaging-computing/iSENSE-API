@@ -18,20 +18,17 @@
 #include <string>
 #include <vector>
 
-/*
- *    Currently working on:
- *    Linux (64 bit) -> Uses a Makefile
- *    Mac OS 10.10 (64 bit) -> should work the same as Linux
- *    Windows 7 / 8.1 (64 bit) -> Requires Visual Studios
+/*  Currently working on:
+ *  Linux (64 bit) -> Uses a Makefile
+ *  Mac OS 10.10 (64 bit) -> should work the same as Linux
+ *  Windows 7 / 8.1 (64 bit) -> Requires Visual Studios
  */
 
-/*
- * NOTE:
+/* NOTE:
  * Most of the API calls expect that you have already set an email & password
  * OR a contributor key, as well as a project ID and a project title.
  * You can set these by either calling the default constructor with parameters,
  * or by calling one of the set methods.
- *
  */
 
 // For picojson
@@ -158,8 +155,8 @@ public:
   bool append_email_byName(std::string dataset_name);
 
   // Helper methods
-  std::string get_Dataset_ID(std::string dataset_name);
-  std::string get_Field_ID(std::string field_name);
+  std::string get_dataset_ID(std::string dataset_name);
+  std::string get_field_ID(std::string field_name);
 
 /*  Future functions to be implemented at a later date.
       //  Editing API calls (not yet implemented)
