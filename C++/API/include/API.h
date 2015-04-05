@@ -52,6 +52,7 @@ const int APPEND_EMAIL = 4;
 // Error checking constants
 const int CURL_ERROR = -1;
 const std::string GET_ERROR = "ERROR";
+const std::string EMPTY = "-----";
 
 class iSENSE {
 public:

@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(Append_withDatasetID_byKey) {
 
   timestamp = test.generate_timestamp();
 
-  test.push_back("Number", "99");
+  test.push_back("Number", "999999");
 
   BOOST_REQUIRE(test.check_append_key_byID(dataset_ID) == true);
 }
