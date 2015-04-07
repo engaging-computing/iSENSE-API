@@ -145,9 +145,21 @@ BOOST_AUTO_TEST_CASE(get_dataset) {
 BOOST_AUTO_TEST_CASE(get_dataset_ID) {
   iSENSE test_true("106", "test", "BOOST Test", "123");
 
+  // Pull down datasets
+  test_true.get_datasets_and_mediaobjects();
 
+  // Try and get dataset ID for the given dataset name.
+  std::string datasetID = test_true.get_dataset_ID("MLB Team Statistics 2013");
+
+  BOOST_REQUIRE(datasetID == "1190");
 
   iSENSE test_false;
+
+  // Not pulling down datasets (or even setting a project ID!)
+  // So this should be equal to GET_ERROR
+  datasetID = test_false.get_dataset_ID("MLB Team Statistics 2013");
+
+  BOOST_REQUIRE(datasetID == GET_ERROR);
 }
 
 
@@ -155,9 +167,21 @@ BOOST_AUTO_TEST_CASE(get_dataset_ID) {
 BOOST_AUTO_TEST_CASE(get_field_ID) {
   iSENSE test_true("106", "test", "BOOST Test", "123");
 
+  // Pull down fields
+  test_true.get_project_fields();
 
+  // Try and get a field ID for the given field.
+  std::string fieldID = test_true.get_field_ID("Wins");
+
+  BOOST_REQUIRE(fieldID == "637");
 
   iSENSE test_false;
+
+  // Not pullin down fields, or setting a project ID, so this should be
+  // equal to GET_ERROR.
+  fieldID = test_false.get_field_ID("Wins");
+
+  BOOST_REQUIRE(fieldID == GET_ERROR);
 }
 
 
