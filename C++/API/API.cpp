@@ -1,6 +1,5 @@
 #include "include/API.h"
 
-
 // Default constructor
 iSENSE::iSENSE() {
   // Set these to default values for error checking.
@@ -453,7 +452,7 @@ bool iSENSE::get_datasets_and_mediaobjects() {
   // This project will try using CURL to make a basic GET request to rSENSE
   // It will then save the JSON it recieves into a picojson object.
   CURL *curl = curl_easy_init();      // cURL object
-  long http_code = 0;                     // HTTP status code
+  long http_code = 0;                 // HTTP status code
   MEMFILE* json_file = memfopen();    // Writing JSON to this file.
   char error[256];                    // Errors get written here
 
@@ -694,14 +693,7 @@ std::string iSENSE::get_dataset_ID(std::string dataset_name) {
   array::iterator it;
 
   // Check and see if the datasets object is empty
-//   if (data_sets.is<picojson::null>() == true) {
-//     // Print an error and quit, we can't do anything if
-//     // the field array wasn't set up correctly.
-//     std::cerr << "\nError in method: get_dataset_ID()\n";
-//     std::cerr << "Dataset array wasn't set up.";
-//     std::cerr << "Have you pulled the fields off iSENSE?\n";
-//     return GET_ERROR;
-//   }
+  // Need to find out how to do this using picojson arrays!
 
   // We made an iterator above, that will let us run through the fields
   for (it = data_sets.begin(); it != data_sets.end(); it++) {
@@ -729,8 +721,7 @@ std::string iSENSE::get_dataset_ID(std::string dataset_name) {
 
 // Call this function to POST data to rSENSE
 bool iSENSE::post_json_key() {
-  /*
-   *  These first couple of if statements perform some basic error checking,
+  /*  These first couple of if statements perform some basic error checking,
    *  such as whether or not all the required fields have been set up.
    */
 
