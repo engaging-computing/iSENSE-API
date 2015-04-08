@@ -214,7 +214,7 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
 
   // If we do not get a code 200, or cURL quits for some reason,
   // we didn't successfully get the project's fields.
-  if (http_code != 200) {
+  if (http_code != HTTP_AUTHORIZED) {
     std::cerr << "\nError in: get_projects_search(string search_term) \n";
     std::cerr << "Project search failed.\n";
     std::cerr << "Something with either curl, your internet connection, \n";
@@ -333,7 +333,7 @@ bool iSENSE::get_check_user() {
    *  Success: 200 OK
    *  Failure: 401 Unauthorized
    */
-  if (http_code == 200) {
+  if (http_code == HTTP_AUTHORIZED) {
     // Clean up cURL
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -388,7 +388,7 @@ bool iSENSE::get_project_fields() {
    *  Failure: 404 Not Found
    */
 
-  if (http_code != 200) {   // If we don't get a code 200, return false.
+  if (http_code != HTTP_AUTHORIZED) {
     std::cerr << "Error in method: get_project_fields()\n";
     std::cerr << "GET project fields failed.\n";
     std::cerr << "Is the project ID you entered valid?\n";
@@ -410,7 +410,7 @@ bool iSENSE::get_project_fields() {
         json_file->data + json_file->size, &errors);
 
   // If we have errors, print them out and quit.
-  if (errors.empty() != true) {
+  if (!errors.empty()) {
     std::cerr << "\nError parsing JSON file in method: get_project_fields()\n";
     std::cerr << "Error was: " << errors;
     return false;
@@ -483,7 +483,7 @@ bool iSENSE::get_datasets_and_mediaobjects() {
 
   // If we do not get a code 200, or cURL quits for some reason,
   // we didn't successfully get the project's fields.
-  if (http_code != 200) {
+  if (http_code != HTTP_AUTHORIZED) {
     std::cerr << "\nError in: get_datasets_and_mediaobjects().\n";
     std::cerr << "GET project fields failed.\n";
     std::cerr << "Is the project ID you entered valid?\n";
@@ -520,12 +520,12 @@ bool iSENSE::get_datasets_and_mediaobjects() {
   data_sets = temp.get<array>();
 
   // Save the media objects to the media objects array
-  value temp2 = get_data.get("mediaObjects");
-  media_objects = temp2.get<array>();
+  temp = get_data.get("mediaObjects");
+  media_objects = temp.get<array>();
 
   // Save the owner info.
-  value temp3 = get_data.get("owner");
-  owner_info = temp3.get<object>();
+  temp = get_data.get("owner");
+  owner_info = temp.get<object>();
 
   return true;
 }
@@ -701,14 +701,14 @@ std::string iSENSE::get_dataset_ID(std::string dataset_name) {
     object obj = it->get<object>();
 
     // Grab the dataset ID and save it in a string
-    std::string Dataset_ID = obj["id"].to_str();
+    std::string dataset_ID = obj["id"].to_str();
 
     // Grab the dataset name
     std::string name = obj["name"].get<std::string>();
 
     if (name == dataset_name) {
       // We found the name, so return the dataset ID
-      return Dataset_ID;
+      return dataset_ID;
     }
   }
 
@@ -777,7 +777,7 @@ bool iSENSE::post_json_key() {
   *           Something in the formatting caused iSENSE to fail.)
   */
 
-  if (http_code == 200) {
+  if (http_code == HTTP_AUTHORIZED) {
     std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
     std::cout << "HTTP Response Code was: " << http_code << "\n";
     std::cout << "The URL to your project is: " << dev_baseURL;
@@ -790,14 +790,14 @@ bool iSENSE::post_json_key() {
   std::cerr << "HTTP Response Code was: " << http_code;
 
   // Make a function for this!
-  if (http_code == 401) {
+  if (http_code == HTTP_UNAUTHORIZED) {
     std::cerr << "Try checking to make sure your contributor key is valid\n";
     std::cerr << "for the project you are trying to contribute to.\n";
   }
-  if (http_code == 404) {
+  if (http_code == HTTP_NOT_FOUND) {
     std::cerr << "Unable to find that project ID.\n";
   }
-  if (http_code == 422) {
+  if (http_code == HTTP_UNPROC_ENTRY) {
     std::cerr << "Something went wrong with iSENSE.\n";
     std::cerr << "Try formatting your data differently, using a contributor \n";
     std::cerr << "key instead of an email, or asking for help from others. \n";
@@ -867,7 +867,7 @@ bool iSENSE::append_key_byID(std::string dataset_ID) {
     *           Something in the formatting caused iSENSE to fail.)
     */
 
-  if (http_code == 200) {
+  if (http_code == HTTP_AUTHORIZED) {
     std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
     std::cout << "HTTP Response Code was: " << http_code << "\n";
     std::cout << "The URL to your project is: " << dev_baseURL;
@@ -880,14 +880,14 @@ bool iSENSE::append_key_byID(std::string dataset_ID) {
   std::cerr << "HTTP Response Code was: " << http_code << "\n";
 
   // Make a function for this!
-  if (http_code == 401) {
+  if (http_code == HTTP_UNAUTHORIZED) {
     std::cerr << "Try checking to make sure your contributor key is valid\n";
     std::cerr << "for the project you are trying to contribute to.\n";
   }
-  if (http_code == 404) {
+  if (http_code == HTTP_NOT_FOUND) {
     std::cerr << "Unable to find that project ID.\n";
   }
-  if (http_code == 422) {
+  if (http_code == HTTP_UNPROC_ENTRY) {
     std::cerr << "Something went wrong with iSENSE.\n";
     std::cerr << "Try formatting your data differently, using a contributor \n";
     std::cerr << "key instead of an email, or asking for help from others. \n";
@@ -1010,7 +1010,7 @@ bool iSENSE::post_json_email() {
     *               Something in the formatting caused iSENSE to fail.)
     */
 
-  if (http_code == 200) {
+  if (http_code == HTTP_AUTHORIZED) {
     std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
     std::cout << "HTTP Response Code was: " << http_code << "\n";
     std::cout << "The URL to your project is: " << dev_baseURL;
@@ -1022,14 +1022,14 @@ bool iSENSE::post_json_email() {
   std::cerr << "HTTP Response Code was: " << http_code << "\n";
 
   // Make a function for this!
-  if (http_code == 401) {
+  if (http_code == HTTP_UNAUTHORIZED) {
     std::cerr << "Try checking to make sure your contributor key is valid\n";
     std::cerr << "for the project you are trying to contribute to.\n";
   }
-  if (http_code == 404) {
+  if (http_code == HTTP_NOT_FOUND) {
     std::cerr << "Unable to find that project ID.\n";
   }
-  if (http_code == 422) {
+  if (http_code == HTTP_UNPROC_ENTRY) {
     std::cerr << "Something went wrong with iSENSE.\n";
     std::cerr << "Try formatting your data differently, using a contributor \n";
     std::cerr << "key instead of an email, or asking for help from others. \n";
@@ -1093,7 +1093,7 @@ bool iSENSE::append_email_byID(std::string dataset_ID) {
    *               Something in the formatting caused iSENSE to fail.)
    */
 
-  if (http_code == 200) {
+  if (http_code == HTTP_AUTHORIZED) {
     std::cout << "\n\nPOST request successfully sent off to iSENSE!\n";
     std::cout << "HTTP Response Code was: " << http_code << "\n";
     std::cout << "The URL to your project is: " << dev_baseURL;
@@ -1106,14 +1106,14 @@ bool iSENSE::append_email_byID(std::string dataset_ID) {
   std::cerr << "HTTP Response Code was: " << http_code << "\n";
 
   // Make a function for this!
-  if (http_code == 401) {
+  if (http_code == HTTP_UNAUTHORIZED) {
     std::cerr << "Try checking to make sure your contributor key is valid\n";
     std::cerr << "for the project you are trying to contribute to.\n";
   }
-  if (http_code == 404) {
+  if (http_code == HTTP_NOT_FOUND) {
     std::cerr << "Unable to find that project ID.\n";
   }
-  if (http_code == 422) {
+  if (http_code == HTTP_UNPROC_ENTRY) {
     std::cerr << "Something went wrong with iSENSE.\n";
     std::cerr << "Try formatting your data differently, using a contributor \n";
     std::cerr << "key instead of an email, or asking for help from others. \n";
@@ -1287,7 +1287,7 @@ int iSENSE::post_data_function(int post_type) {
   if (upload_URL == EMPTY || upload_URL.empty()) {
     std::cerr << "\nError in method: post_data_function()\n";
     std::cerr << "Please set a valid upload URL.\n";
-    return -1;
+    return CURL_ERROR;
   }
 
   // Format the data to be uploaded. Call another function to format this.

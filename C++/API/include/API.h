@@ -46,8 +46,15 @@ const int APPEND_KEY = 2;
 const int POST_EMAIL = 3;
 const int APPEND_EMAIL = 4;
 
-// Error checking constants
+// HTTP Error codes
+const int HTTP_AUTHORIZED = 200;
+const int HTTP_UNAUTHORIZED = 401;
+const int HTTP_NOT_FOUND = 404;
+const int HTTP_CONFLICT = 409;
+const int HTTP_UNPROC_ENTRY = 422;
 const int CURL_ERROR = -1;
+
+// Error checking constants
 const std::string GET_ERROR = "ERROR";
 const std::string EMPTY = "-----";
 
