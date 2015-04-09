@@ -109,14 +109,11 @@ class Isense:
 
         url = self.baseUrl+ 'projects/' + self.projectID+'/jsonDataUpload'
 
-        print dataForPost
-
         payload = {
             'title': title + ' ' + timestamp_reformatted,                                 
             'contribution_key': self.contributorKey,                    
             'contributor_name': self.contributorName,
-            'data': dataForPost
-            
+            'data': dataForPost    
         }
 
         headers = {'content-type': 'application/json'}
@@ -129,21 +126,19 @@ class Isense:
 
         parsedResponseProject = self.projectGetRequest()
         datasetId = self.getDatasetId(datasetName,parsedResponseProject)
-        print 'hi'
-        #WORKS UP TO HERE CHANGE EVERYTHING BELOW TO PYTHON STYLE INSTEAD OF JS STYLE
         dataForPost = {}
         fieldID = []
 
         for i in range(0, len(fields)):
 
-            fieldID.append(isense.getFieldID(fields[i],parsedResponseProject))
+            fieldID.append(self.getFieldID(fields[i],parsedResponseProject))
             dataForPost[fieldID[i]] = data[i]
 
         url = 'http://rsense-dev.cs.uml.edu/api/v1/data_sets/append'
 
         payload = {
             'contribution_key': self.contributorKey,                    
-            'id': self.datasetID,
+            'id': datasetId,
             'data': dataForPost
             
         }
