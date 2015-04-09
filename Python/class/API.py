@@ -30,15 +30,14 @@ class Isense:
 
     def getDatasetId(self,datasetName,parsedResponseProject):
 
-        for i in range(0,parsedResponseProject.json()['dataSetCount']):
+        for i in range(0,parsedResponseProject.json()['dataSetCount'] - 1):
 
             if parsedResponseProject.json()['dataSets'][i]['name'] == datasetName:
                 datasetLocation = i;
-                
-                datasetID = parsedResponseProject.dataSets[i].id;
-        
 
-        if datasetID == null:
+                datasetID = parsedResponseProject.json()['dataSets'][i]['id'];
+
+        if datasetID == None:
             return "Dataset Not Found"
 
         return datasetID;
@@ -130,6 +129,8 @@ class Isense:
 
         parsedResponseProject = self.projectGetRequest()
         datasetId = self.getDatasetId(datasetName,parsedResponseProject)
+        print 'hi'
+        #WORKS UP TO HERE CHANGE EVERYTHING BELOW TO PYTHON STYLE INSTEAD OF JS STYLE
         dataForPost = {}
         fieldID = []
 
