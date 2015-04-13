@@ -1,5 +1,6 @@
 import requests,json,time,datetime
 
+baseUrl = 'http://rsense-dev.cs.uml.edu/api/v1/';
 
 class Isense:
 
@@ -7,11 +8,10 @@ class Isense:
         self.projectID = projectID
         self.contributorKey = contributorKey
         self.contributorName = contributorName
-        self.baseUrl = 'http://rsense-dev.cs.uml.edu/api/v1/';
 
     def projectGetRequest(self):
         
-        urlProject = self.baseUrl+ 'projects/' + self.projectID+'?recur=true';
+        urlProject = baseUrl + 'projects/' + self.projectID+'?recur=true';
 
         data = requests.get(urlProject)
 
@@ -26,11 +26,12 @@ class Isense:
                 datasetID = parsedResponseProject.json()['dataSets'][i]['id']
                 return datasetLocation
 
-        return 'Dataset not found'
+        return None
 
     def getDatasetId(self,datasetName,parsedResponseProject):
 
-        for i in range(0,parsedResponseProject.json()['dataSetCount'] - 1):
+        datasetID = None
+        for i in range(0,parsedResponseProject.json()['dataSetCount']):
 
             if parsedResponseProject.json()['dataSets'][i]['name'] == datasetName:
                 datasetLocation = i;
@@ -38,12 +39,14 @@ class Isense:
                 datasetID = parsedResponseProject.json()['dataSets'][i]['id'];
 
         if datasetID == None:
-            return "Dataset Not Found"
+            return None
 
         return datasetID;
   
 
     def getFieldID(self,fieldName,parsedResponseProject):
+
+        datasetID = None
 
         for i in range(0,parsedResponseProject.json()['fieldCount']):
 
@@ -53,7 +56,7 @@ class Isense:
                 fieldID = str(fieldID)
                 return fieldID;
        
-        return "Field Not Found"      
+        return None      
       
     def getDatasetFieldData(self,datasetName,fieldName):
 
@@ -64,6 +67,9 @@ class Isense:
         datasetLocation = self.getDatasetLocation(datasetName,parsedResponseProject)
 
         fieldID = self.getFieldID(fieldName,parsedResponseProject)
+
+        if fieldID == None:
+            return None
 
         for i in range(0,parsedResponseProject.json()['dataSets'][datasetLocation]['datapointCount']):
             values.append(int(parsedResponseProject.json()['dataSets'][datasetLocation]['data'][i][fieldID]))  
@@ -77,7 +83,11 @@ class Isense:
 
         parsedResponseProject = self.projectGetRequest()
         fieldID = self.getFieldID(fieldName,parsedResponseProject)
-        url = self.baseUrl + 'projects/' + self.projectID+'/jsonDataUpload'
+
+        if fieldID == None:
+            return None
+            
+        url = baseUrl + 'projects/' + self.projectID+'/jsonDataUpload'
 
         payload = {
             'title': datasetName + ' ' + timestamp_reformatted,                                 
@@ -92,8 +102,6 @@ class Isense:
 
         r = requests.post(url, data=json.dumps(payload), headers=headers)
 
-        print "\nPost Complete"
-
     def postDatasetHorizontal(self,fields,title,data):
 
         timestamp = time.time()
@@ -107,7 +115,7 @@ class Isense:
             fieldID.append(self.getFieldID(fields[i],parsedResponseProject))
             dataForPost[fieldID[i]] = data[i]
 
-        url = self.baseUrl+ 'projects/' + self.projectID+'/jsonDataUpload'
+        url = baseUrl+ 'projects/' + self.projectID+'/jsonDataUpload'
 
         payload = {
             'title': title + ' ' + timestamp_reformatted,                                 
@@ -119,8 +127,6 @@ class Isense:
         headers = {'content-type': 'application/json'}
 
         r = requests.post(url, data=json.dumps(payload), headers=headers)
-
-        print "Post Successful"
 
     def appendToDataset(self,datasetName,fields,data):
 
