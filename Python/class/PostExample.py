@@ -1,7 +1,11 @@
-import IsenseModule
+import API
 
-data = IsenseModule.getDatasetFieldData('106','MLB Team Statistics 2013','Runs')
+x = API.Isense('106','key','TYLER')
 
-print data
+print x.getDatasetFieldData('MLB Team Statistics 2013','Runs')
 
-IsenseModule.postDataset('106','Key','Calculated Runs','TEST','TYLER',data)
+x.postDataset('Runs','MLB Team Statistics 2013',[5])
+
+x.postDatasetHorizontal(['Runs','Hits'],'Test',[[5],[2]])
+
+x.appendToDataset('TESTETSTES 2015-03-18 17:26:40',['Runs','Hits'],[[5],[2]])
