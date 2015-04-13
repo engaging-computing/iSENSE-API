@@ -65,6 +65,9 @@ class Isense:
         parsedResponseProject = self.projectGetRequest()
 
         datasetLocation = self.getDatasetLocation(datasetName,parsedResponseProject)
+        
+        if datasetLocation == None:
+            return None
 
         fieldID = self.getFieldID(fieldName,parsedResponseProject)
 
@@ -86,7 +89,7 @@ class Isense:
 
         if fieldID == None:
             return None
-            
+
         url = baseUrl + 'projects/' + self.projectID+'/jsonDataUpload'
 
         payload = {
