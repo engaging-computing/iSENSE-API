@@ -41,7 +41,7 @@ import edu.uml.cs.isense.objects.RProjectField;
  */
 
 public class API {
-	private final String version_major = "4";
+	private final String version_major = "5";
 	private final String version_minor = "1";
 	private String version;
 
@@ -362,7 +362,7 @@ public class API {
 
 		try {
 			String reqResult = makeRequest(baseURL, "projects/" + projectId,
-					"?recur=true", "GET", null);
+					"recur=true", "GET", null);
 			JSONObject j = new JSONObject(reqResult);
 			JSONArray j2 = j.getJSONArray("fields");
 			for (int i = 0; i < j2.length(); i++) {
