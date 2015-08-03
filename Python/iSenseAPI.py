@@ -55,7 +55,7 @@ def createField(email, password, projectId, name, fieldType, other):
 
     if other is None:
         payload = {'email': email, 'password': password, 'field': {'project_id': str(projectId), 'name': name, 'field_type': fieldType}} 
-    if fieldType == NUMBER: # other will be units
+    elif fieldType == NUMBER: # other will be units
         payload = {'email': email, 'password': password, 'field': {'project_id': str(projectId), 'name': name, 'field_type': fieldType, 'unit': other}}
     elif fieldType == TEXT: # other will be text restrictions
         payload = {'email': email, 'password': password, 'field': {'project_id': str(projectId), 'name': name, 'field_type': fieldType, 'restrictions': other}}
@@ -158,3 +158,4 @@ def appendDataSetWithKey(contribKey, dataSetId, data):
     request = requests.post(url, data=data, headers=headers)
     dictionary = json.loads(request.text)
     return dictionary
+
