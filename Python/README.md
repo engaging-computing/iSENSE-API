@@ -1,5 +1,5 @@
 Python
-=====
+================================================
 
 These examples use a variety of python libraries.
 
@@ -8,36 +8,31 @@ For HTTP GET/POST requests, there are two that seem to work:
 1. urllib2 / json - working for basic GET requests
 2. requests - works for GET and POST requests
 
-To install these, simply use the following command (on Linux. Windows How-To coming soon):
+To install these, simply use the following command (Linux. Windows How-To coming soon):
 
-```
+Python 2
+*************************************************
+sudo apt-get install python-pip (linux only)
+sudo easy_install pip (Mac only)
 pip install requests
 pip install json
-```
+*************************************************
+
+Python 3
+*************************************************
+sudo apt-get install python3-pip
+pip3 install requests
+pip3 install json
+*************************************************
+
+
+About each file
+*************************************************
+iSenseAPI.py is a low level API wrapper. 
+iSense.py is a more abstract an easy to use wrapper around iSenseAPI.py
+example.py shows how to use iSense.py
+
+All of these can be run with python or python3
 
 More information about the Requests library can be found here:
 [Python Request Quickstart Guide](http://docs.python-requests.org/en/latest/user/quickstart/)
-
-Notes
----------
-
-1. For POST requests, it seems you need to format the request a specific way.
-
-   This is an example of a request that should work, given a valid iSENSE URL:
-
-    ```python
-    import json
-    url = 'http://rsense-dev.cs.uml.edu/api/v1/projects/744/jsonDataUpload'
-    payload = {'FIELDS': '[DATA, DATA, DATA]'}
-    headers = {'content-type': 'application/json'}
-    r = requests.post(url, data=json.dumps(payload), headers=headers)
-    ```
-
-    The above code is based off of the following page:
-    [Python Requests JSON content](http://docs.python-requests.org/en/latest/user/quickstart/#json-response-content)
-
-2. To get the fields for an iSENSE project, go to the following URL:
-
-    http://rsense-dev.cs.uml.edu/api/v1/projects/PROJECT_ID
-
-    (Replace PROJECT_ID with the ID of the project you want to use.)
