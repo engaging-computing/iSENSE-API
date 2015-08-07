@@ -119,7 +119,7 @@ def editDataSet(email, password, dataSetId, data):
     data = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
     
-    request = requests.post(url, data=data, headers=headers)
+    request = requests.get(url, data=data, headers=headers)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -131,7 +131,7 @@ def editDataSetWithKey(contribKey, dataSetId, data):
     data = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
     
-    request = requests.post(url, data=data, headers=headers)
+    request = requests.get(url, data=data, headers=headers)
     dictionary = json.loads(request.text)
     return dictionary
 

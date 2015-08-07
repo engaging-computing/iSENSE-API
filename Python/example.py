@@ -2,7 +2,7 @@ import iSense
 
 # Get a Project Object
 my_project = iSense.Project(1200)
-user_credentials = iSense.Credentials(username="myusername@email.com", password="my_password")
+user_credentials = iSense.Credentials(username="myemail@example.com", password="password")
 key_credentials = iSense.Credentials(contrib_key="MyProjectsKey", contrib_name="My Name")
 
 # Print some info about the project
@@ -47,8 +47,7 @@ print(my_project.getDataByField(field))
 
 
 # Create our own Project
-response = iSense.createProject("Test Project created in python.", user_credentials)
-new_project = iSense.Project(response['id'])
+new_project = iSense.createProject("Test Project created in python.", user_credentials)
 print("\nNew Projects Name:")
 print(new_project.getName())
 
@@ -66,6 +65,20 @@ print(new_field.getName())
 print("\nData Set Count Before Upload:")
 print(new_project.getDataSetCount())
 data_to_be_uploaded = {str(new_field.getId()): [1, 2, 3] }
-new_project.createDataSet("My new data set", data_to_be_uploaded, user_credentials)
+new_ds = new_project.createDataSet("My new data set", data_to_be_uploaded, user_credentials)
 print("\nData Set Count After Upload:")
 print(new_project.getDataSetCount())
+print("Data From new DS:")
+print(new_ds.getData())
+
+# Append Data
+data_to_be_appended = {str(new_field.getId()): [4] }
+new_ds.appendData(data_to_be_appended, user_credentials)
+print("Data after appending 4:")
+print(new_ds.getData())
+
+# Editing Data from 1, 2, 3, 4 -> 5, 6, 7, 8
+data_to_be_edited = {str(new_field.getId()): [5, 6, 7, 8] }
+new_ds.editData(data_to_be_edited, user_credentials)
+print("Data after editing to 5, 6, 7, 8:")
+print(new_ds.getData())

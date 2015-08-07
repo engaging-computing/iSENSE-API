@@ -6,8 +6,6 @@ NUMBER = iSenseAPI.NUMBER
 TEXT = iSenseAPI.TEXT
 LOCATION = iSenseAPI.LOCATION
 
-INVALID_CREDENTIALS_MESSAGE = "Credentials object is invalid. It must be initialized with either (username and password) OR (contrib_key and contrib_name)"
-
 class Project(object):
 
     def __init__(self, project_id): 
@@ -82,9 +80,11 @@ class Project(object):
         if credentials.isUser():
             response = iSenseAPI.createField(credentials.getUsername(), credentials.getPassword(), self.__id, name, fieldType, other)
             self.refresh()
-            return response
+            f_obj = Field(response['id'], response['name'], response['type'], response['restrictions'])
+            return f_obj
 
-        return INVALID_CREDENTIALS_MESSAGE
+        raise ValueError('Credentials must be for a user')
+
 
 
     #   createDataSet takes a dictionary like this
@@ -96,17 +96,18 @@ class Project(object):
     def createDataSet(self, title, data, credentials):
         # post request too post data
         if credentials.isUser():
-            result =  iSenseAPI.uploadDataSet(credentials.getUsername(), credentials.getPassword(), self.__id, title, data)
+            response =  iSenseAPI.uploadDataSet(credentials.getUsername(), credentials.getPassword(), self.__id, title, data)
         elif credentials.isKey():
-            result =  iSenseAPI.uploadDataSetWithKey(credentials.getContribKey(), credentials.getContribName(), self.id, title, data)
-        else:
-            result = INVALID_CREDENTIALS_MESSAGE
+            response =  iSenseAPI.uploadDataSetWithKey(credentials.getContribKey(), credentials.getContribName(), self.__id, title, data)
 
         # Updates this object to reflect the new data sets.
         self.refresh()
 
         # This result is a dictionary of the server response.
-        return result
+        ds_obj = DataSet(response)
+
+        # Return data set object
+        return ds_obj
 
     def getName(self):
         return self.__name
@@ -177,7 +178,8 @@ class DataSet(object):
 
     # Refresh pulls down the data sets latest data from isense
     def refresh(self):
-        self.__init__(self.data)
+        response = iSenseAPI.getDataSet(int(self.__id))
+        self.__init__(response)
         return
 
     def getId(self):
@@ -214,25 +216,40 @@ class DataSet(object):
         return self.__data
 
     # given another data object it will append it to this data set
-    def appendData(self, data_set_id, data_dictionary, credentials):
+    def appendData(self, data_dictionary, credentials):
 
         # Append the new data to the data set on iSENSE
         if credentials.isUser():
-            response = iSenseAPI().appendDataSet(credentials.getUsername(), credentials.getPassword(),
-                data_set_id, data_dictionary)
+            response = iSenseAPI.appendDataSet(credentials.getUsername(), credentials.getPassword(),
+                self.__id, data_dictionary)
         elif credentials.isKey():
-            response = iSenseAPI().appendDataSet(credentials.contrib_key(),
-                data_set_id, data_dictionary)
-        else:
-            response = INVALID_CREDENTIALS 
+            response = iSenseAPI.appendDataSet(credentials.contrib_key(),
+                self.__id, data_dictionary)
 
         # After the data is uploaded refresh this data set object so it has the latest data 
-        refresh()
+        self.refresh()
 
         # Response is a dictionary. It can be used to check if the post request was successful.
         # It also will contain any errors the server may have returned.
         return response
 
+    # Will edit 
+    def editData(self, data_dictionary, credentials):
+
+        # Append the new data to the data set on iSENSE
+        if credentials.isUser():
+            response = iSenseAPI.editDataSet(credentials.getUsername(), credentials.getPassword(),
+                self.__id, data_dictionary)
+        elif credentials.isKey():
+            response = iSenseAPI.editDataSet(credentials.contrib_key(),
+                self.__id, data_dictionary)
+
+        # After the data is uploaded refresh this data set object so it has the latest data 
+        self.refresh()
+
+        # Response is a dictionary. It can be used to check if the post request was successful.
+        # It also will contain any errors the server may have returned.
+        return response
    
 
 
@@ -267,14 +284,17 @@ class Credentials(object):
         self.__user = False
         self.__key = False
 
-        if username and password:
-            self.__user = True
-            self.__username = username
-            self.__password = password
-        elif contrib_key and contrib_name:
+        if contrib_key and contrib_name:
             key = True
             self.__contrib_key = contrib_key
             self.__contrib_name = contrib_name
+        elif username and password:
+            self.__user = True
+            self.__username = username
+            self.__password = password
+        else: 
+            raise ValueError('Credentials require either username and password or contrib_key and contrib_name')
+
 
 
     def getUsername(self):
@@ -293,7 +313,7 @@ class Credentials(object):
     def isUser(self):
         return self.__user
 
-    # Check if the credentials are a key
+    # Check if the credentials are a keypyt
     def isKey(self):
         return self.__key
 
@@ -304,7 +324,9 @@ def createProject(name, credentials):
         password = credentials.getPassword()
         response = iSenseAPI.createProject(username, password, name)
     else:
-        return "Credentials must be for a User"
+        raise ValueError('Credentials must be for a user')
 
-    # If project was created the id will be in the response. Response is a dictionary.
-    return response 
+
+    # Return project object
+    proj_obj = Project(response['id'])
+    return proj_obj
