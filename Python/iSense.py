@@ -223,7 +223,7 @@ class DataSet(object):
             response = iSenseAPI.appendDataSet(credentials.getUsername(), credentials.getPassword(),
                 self.__id, data_dictionary)
         elif credentials.isKey():
-            response = iSenseAPI.appendDataSet(credentials.contrib_key(),
+            response = iSenseAPI.appendDataSetWithKey(credentials.contrib_key(),
                 self.__id, data_dictionary)
 
         # After the data is uploaded refresh this data set object so it has the latest data 
@@ -241,7 +241,7 @@ class DataSet(object):
             response = iSenseAPI.editDataSet(credentials.getUsername(), credentials.getPassword(),
                 self.__id, data_dictionary)
         elif credentials.isKey():
-            response = iSenseAPI.editDataSet(credentials.contrib_key(),
+            response = iSenseAPI.editDataSetWithKey(credentials.contrib_key(),
                 self.__id, data_dictionary)
 
         # After the data is uploaded refresh this data set object so it has the latest data 
@@ -280,12 +280,11 @@ class Field(object):
 class Credentials(object):
     def __init__(self, username=None, password=None, 
                  contrib_key=None, contrib_name=None):
-
         self.__user = False
         self.__key = False
 
         if contrib_key and contrib_name:
-            key = True
+            self.__key = True
             self.__contrib_key = contrib_key
             self.__contrib_name = contrib_name
         elif username and password:
