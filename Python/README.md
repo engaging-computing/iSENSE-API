@@ -8,19 +8,29 @@ For HTTP GET/POST requests, there are two that seem to work:
 1. urllib2 / json - working for basic GET requests
 2. requests - works for GET and POST requests
 
-To install these, simply use the following command (Linux. Windows How-To coming soon):
+************************************************ 
+
+pip is a package management system used to install and manage software packages written in Python. We recomend you install the packages required using pip.
+
+More info on how to install pip can be found using the link below. (Windows, Mac, and Linux)
+
+https://pip.pypa.io/en/latest/installing.html
+
+*************************************************
+
+To install the packages needed, simply use the following commands:
 
 Python 2
 *************************************************
-sudo apt-get install python-pip (linux only)
-sudo easy_install pip (Mac only)
+sudo apt-get install python-pip (Install pip linux only)
+sudo easy_install pip (Install pip Mac only)
 pip install requests
 pip install json
 *************************************************
 
 Python 3
 *************************************************
-sudo apt-get install python3-pip
+sudo apt-get install python3-pip (Install pip3 linux only)
 pip3 install requests
 pip3 install json
 *************************************************
