@@ -2,8 +2,7 @@ import iSense
 
 # Get a Project Object
 my_project = iSense.Project(1200)
-user_credentials = iSense.Credentials(username="myemail@example.com", password="password")
-key_credentials = iSense.Credentials(contrib_key="MyProjectsKey", contrib_name="My Name")
+user_credentials = iSense.Credentials(username="mobile.fake@example.com", password="mobile")
 
 # Print some info about the project
 print("Project id:")
@@ -51,6 +50,10 @@ new_project = iSense.createProject("Test Project created in python.", user_crede
 print("\nNew Projects Name:")
 print(new_project.getName())
 
+# Add a key to the project
+new_project.addKey(user_credentials, "MyKeyLabel", "key")
+key_credentials = iSense.Credentials(contrib_key="key", contrib_name="Python User")
+
 # Add a field to the new Project
 server_response = new_project.addField(user_credentials, "My Number Field", iSense.NUMBER, "feet")
 
@@ -71,14 +74,32 @@ print(new_project.getDataSetCount())
 print("Data From new DS:")
 print(new_ds.getData())
 
+# Upload same data again but with key
+ds_from_key = new_project.createDataSet("My new data set", data_to_be_uploaded, key_credentials)
+print("\nData Set Count After Upload:")
+print(new_project.getDataSetCount())
+print("Data From DS uploaded with key:")
+print(ds_from_key.getData())
+
 # Append Data
 data_to_be_appended = {str(new_field.getId()): [4] }
 new_ds.appendData(data_to_be_appended, user_credentials)
-print("Data after appending 4:")
+print("Data user uploaded after appending 4:")
 print(new_ds.getData())
+
+data_to_be_appended = {str(new_field.getId()): [4] }
+ds_from_key.appendData(data_to_be_appended, key_credentials)
+print("Data uploaded with key after appending 4:")
+print(ds_from_key.getData())
 
 # Editing Data from 1, 2, 3, 4 -> 5, 6, 7, 8
 data_to_be_edited = {str(new_field.getId()): [5, 6, 7, 8] }
 new_ds.editData(data_to_be_edited, user_credentials)
-print("Data after editing to 5, 6, 7, 8:")
+print("Data user uploaded after editing to 5, 6, 7, 8:")
 print(new_ds.getData())
+
+data_to_be_edited = {str(new_field.getId()): [5, 6, 7, 8] }
+ds_from_key.editData(data_to_be_edited, key_credentials)
+print("Data user uploaded after editing to 5, 6, 7, 8:")
+print(new_ds.getData())
+

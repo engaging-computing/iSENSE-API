@@ -4,8 +4,8 @@ import requests,json,time,datetime
 # Docs are at http://isenseproject.org/api/v1/docs
 
 # All API calls go through the following url
-BASE_URL = 'http://isenseproject.org/api/v1/'
-#BASE_URL = 'http://rsense-dev.cs.uml.edu/api/v1/'
+#BASE_URL = 'http://isenseproject.org/api/v1/'
+BASE_URL = 'http://rsense-dev.cs.uml.edu/api/v1/'
 
 
 # Field Types
@@ -18,7 +18,8 @@ LOCATION = 4
 def getProject(projID, recur=False):
     url = BASE_URL + 'projects/' + str(projID) +'?recur=' + str(recur).lower()
     request = requests.get(url)
-
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -27,7 +28,8 @@ def createProject(email, password, name):
     url = BASE_URL + 'projects/'
     payload = {'email': email, 'password': password, 'project_name': name}
     request = requests.post(url, params=payload)
-
+    if request.status_code != 201:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -38,6 +40,8 @@ def createContributorKey(email, password, projId, name, key):
     data = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
     request = requests.post(url, data=data, headers=headers)
+    if request.status_code != 201:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -45,6 +49,8 @@ def createContributorKey(email, password, projId, name, key):
 def getField(fieldId):
     url = BASE_URL + 'fields/' + str(fieldId)
     request = requests.get(url)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -66,6 +72,8 @@ def createField(email, password, projectId, name, fieldType, other):
     headers = {'Content-Type': 'application/json'}
 
     request = requests.post(url, data=data, headers=headers)
+    if request.status_code != 201:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -73,6 +81,8 @@ def createField(email, password, projectId, name, fieldType, other):
 def getDataSet(dataSetId):
     url = BASE_URL + 'data_sets/' + str(dataSetId)
     request = requests.get(url)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -90,6 +100,8 @@ def uploadDataSet(email, password, projId, title, data):
     headers = {'Content-Type': 'application/json'}
 
     request = requests.post(url, data=data, headers=headers)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -107,6 +119,8 @@ def uploadDataSetWithKey(contribKey, contribName, projId, title, data):
     headers = {'Content-Type': 'application/json'}
 
     request = requests.post(url, data=data, headers=headers)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -120,6 +134,8 @@ def editDataSet(email, password, dataSetId, data):
     headers = {'Content-Type': 'application/json'}
     
     request = requests.get(url, data=data, headers=headers)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -132,6 +148,8 @@ def editDataSetWithKey(contribKey, dataSetId, data):
     headers = {'Content-Type': 'application/json'}
     
     request = requests.get(url, data=data, headers=headers)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -144,6 +162,8 @@ def appendDataSet(email, password, dataSetId, data):
     headers = {'Content-Type': 'application/json'}
     
     request = requests.post(url, data=data, headers=headers)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
@@ -156,6 +176,18 @@ def appendDataSetWithKey(contribKey, dataSetId, data):
     headers = {'Content-Type': 'application/json'}
     
     request = requests.post(url, data=data, headers=headers)
+    if request.status_code != 200:
+        raise ISenseApiException(request.status_code)
     dictionary = json.loads(request.text)
     return dictionary
 
+class ISenseApiException(Exception):
+   def __init__(self, status):
+        status_codes =  {       404 : 'Not found. Check to see if the id you provided is valid.',
+                500 : 'iSENSE request failed due to an internal server error.',
+                401 : 'The credentials you provided are invalid or do not have permission to make the request.',
+                422 : 'The server was unable to parse request.'
+        }
+
+        self.error_msg = status_codes.get(status, "There was a problem with a request made to iSENSE. Status code " + str(status))
+        print self.error_msg

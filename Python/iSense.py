@@ -43,6 +43,12 @@ class Project(object):
             self.__field_ids.append(field['id'])
             self.__fields.append(field_object)
 
+    def addKey(self, credentials, label, key):
+        if credentials.isUser():
+            iSenseAPI.createContributorKey(credentials.getUsername(), credentials.getPassword(), self.__id, label, key)
+
+        return self
+
     def refresh(self):
         self.__init__(self.__id)
 
@@ -83,7 +89,7 @@ class Project(object):
             f_obj = Field(response['id'], response['name'], response['type'], response['restrictions'])
             return f_obj
 
-        raise ValueError('Credentials must be for a user')
+        raise ISenseCredentialsException('Credentials must be for a user')
 
 
 
@@ -223,7 +229,7 @@ class DataSet(object):
             response = iSenseAPI.appendDataSet(credentials.getUsername(), credentials.getPassword(),
                 self.__id, data_dictionary)
         elif credentials.isKey():
-            response = iSenseAPI.appendDataSetWithKey(credentials.contrib_key(),
+            response = iSenseAPI.appendDataSetWithKey(credentials.getContribKey(),
                 self.__id, data_dictionary)
 
         # After the data is uploaded refresh this data set object so it has the latest data 
@@ -241,7 +247,7 @@ class DataSet(object):
             response = iSenseAPI.editDataSet(credentials.getUsername(), credentials.getPassword(),
                 self.__id, data_dictionary)
         elif credentials.isKey():
-            response = iSenseAPI.editDataSetWithKey(credentials.contrib_key(),
+            response = iSenseAPI.editDataSetWithKey(credentials.getContribKey,
                 self.__id, data_dictionary)
 
         # After the data is uploaded refresh this data set object so it has the latest data 
@@ -292,7 +298,7 @@ class Credentials(object):
             self.__username = username
             self.__password = password
         else: 
-            raise ValueError('Credentials require either username and password or contrib_key and contrib_name')
+            raise ISenseCredentialsException('Credentials require either username and password or contrib_key and contrib_name')
 
 
 
@@ -323,9 +329,15 @@ def createProject(name, credentials):
         password = credentials.getPassword()
         response = iSenseAPI.createProject(username, password, name)
     else:
-        raise ValueError('Credentials must be for a user')
+        raise ISenseCredentialsException('Credentials must be for a user')
 
 
     # Return project object
     proj_obj = Project(response['id'])
     return proj_obj
+
+
+class ISenseCredentialsException(Exception):
+   def __init__(self, msg):
+        self.error_msg = msg
+        print self.error_msg
