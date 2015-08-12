@@ -2,7 +2,7 @@ import iSense
 
 # Get a Project Object
 my_project = iSense.Project(1200)
-user_credentials = iSense.Credentials(username="mobile.fake@example.com", password="mobile")
+user_credentials = iSense.Credentials(username="your email", password="your password")
 
 # Print some info about the project
 print("Project id:")
@@ -54,20 +54,23 @@ print(new_project.getName())
 new_project.addKey(user_credentials, "MyKeyLabel", "key")
 key_credentials = iSense.Credentials(contrib_key="key", contrib_name="Python User")
 
-# Add a field to the new Project
-server_response = new_project.addField(user_credentials, "My Number Field", iSense.NUMBER, "feet")
+# Add fields to project
+print("\n Add some fields to project:")
+# Add a some fields to the new Project
+num_field = new_project.addField(user_credentials, "My Number Field", iSense.NUMBER, "feet")
+lat_field = new_project.addField(user_credentials, None, iSense.LATITUDE, None)
+lon_field = new_project.addField(user_credentials, None, iSense.LONGITUDE, None)
+# "field_array = new_project.getFields()" would return an array containing the three fields at this point
+print num_field.getName()
+print lat_field.getName()
+print lon_field.getName()
 
-# This will give us the field object
-field_array = new_project.getFields()
-new_field = field_array[0]
-print("\nField we created:")
-print(new_field.getName())
 
 # Upload Data to our new project.
 # Data must be in the format {"fieldId": [data,data2,data3[], "fieldID2": [data, data2, data3]}
 print("\nData Set Count Before Upload:")
 print(new_project.getDataSetCount())
-data_to_be_uploaded = {str(new_field.getId()): [1, 2, 3] }
+data_to_be_uploaded = {str(num_field.getId()): [1, 2, 3] }
 new_ds = new_project.createDataSet("My new data set", data_to_be_uploaded, user_credentials)
 print("\nData Set Count After Upload:")
 print(new_project.getDataSetCount())
@@ -82,24 +85,24 @@ print("Data From DS uploaded with key:")
 print(ds_from_key.getData())
 
 # Append Data
-data_to_be_appended = {str(new_field.getId()): [4] }
+data_to_be_appended = {str(num_field.getId()): [4] }
 new_ds.appendData(data_to_be_appended, user_credentials)
 print("Data user uploaded after appending 4:")
 print(new_ds.getData())
 
-data_to_be_appended = {str(new_field.getId()): [4] }
+data_to_be_appended = {str(num_field.getId()): [4] }
 ds_from_key.appendData(data_to_be_appended, key_credentials)
 print("Data uploaded with key after appending 4:")
 print(ds_from_key.getData())
 
 # Editing Data from 1, 2, 3, 4 -> 5, 6, 7, 8
-data_to_be_edited = {str(new_field.getId()): [5, 6, 7, 8] }
+data_to_be_edited = {str(num_field.getId()): [5, 6, 7, 8] }
 new_ds.editData(data_to_be_edited, user_credentials)
 print("Data user uploaded after editing to 5, 6, 7, 8:")
 print(new_ds.getData())
 
-data_to_be_edited = {str(new_field.getId()): [5, 6, 7, 8] }
+# Editing the data set that was uploaded with a key
+data_to_be_edited = {str(num_field.getId()): [5, 6, 7, 8] }
 ds_from_key.editData(data_to_be_edited, key_credentials)
 print("Data user uploaded after editing to 5, 6, 7, 8:")
 print(new_ds.getData())
-
