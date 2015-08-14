@@ -85,15 +85,15 @@ print("Data From DS uploaded with key:")
 print(ds_from_key.getData())
 
 # Append Data
-data_to_be_appended = {str(num_field.getId()): [4] }
-new_ds.appendData(data_to_be_appended, user_credentials)
-print("Data user uploaded after appending 4:")
-print(new_ds.getData())
+# data_to_be_appended = {str(num_field.getId()): [4] }
+# new_ds.appendData(data_to_be_appended, user_credentials)
+# print("Data user uploaded after appending 4:")
+# print(new_ds.getData())
 
-data_to_be_appended = {str(num_field.getId()): [4] }
-ds_from_key.appendData(data_to_be_appended, key_credentials)
-print("Data uploaded with key after appending 4:")
-print(ds_from_key.getData())
+# data_to_be_appended = {str(num_field.getId()): [4] }
+# ds_from_key.appendData(data_to_be_appended, key_credentials)
+# print("Data uploaded with key after appending 4:")
+# print(ds_from_key.getData())
 
 # Editing Data from 1, 2, 3, 4 -> 5, 6, 7, 8
 data_to_be_edited = {str(num_field.getId()): [5, 6, 7, 8] }

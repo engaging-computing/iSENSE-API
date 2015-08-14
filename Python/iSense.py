@@ -62,19 +62,20 @@ class Project(object):
 
     def getDataSetById(self, data_id):
         for d in self.__data_sets:
-            if d.getName() == data_id:
+            if d.getId() == data_id:
                 return d 
 
         # None of the data sets match
         return None
 
     def getDataSetByName(self, name):
+        ds_list = []
         for d in self.__data_sets:
-            if d.getName() == name:
-                return d
+            if name in d.getName():
+                ds_list.append(d)
 
         # None of the data sets match
-        return None
+        return ds_list
 
     def getFields(self):
         return self.__fields
