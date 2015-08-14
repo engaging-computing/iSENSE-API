@@ -60,3 +60,5 @@
 
 # ignore the picojson header file
 picojson.h
+
+*.pyc
