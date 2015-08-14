@@ -184,9 +184,9 @@
     dsetContrib.editData(data, credUser);
   }, 'Should have been able to edit data set data as user');
 
-  //assertNoException(function() {
-  //  dsetContrib.editData(data, credContrib);
-  //}, 'Should have been able to edit data set data as contributor');
+  assertNoException(function() {
+    dsetContrib.editData(data, credContrib);
+  }, 'Should have been able to edit data set data as contributor');
 
   assertNoException(function() {
     dsetUser.appendData(data, credUser);
