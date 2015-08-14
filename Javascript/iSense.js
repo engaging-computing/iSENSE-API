@@ -467,7 +467,6 @@
   }
 
   ISense.Project.prototype.addContribKey = function(label, key, creds) {
-    // email password projid name key
     var r;
     if (!(creds instanceof ISense.Credentials)) {
       throw ISenseException(ISenseErrors.NeedsCredentials);
