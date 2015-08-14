@@ -120,8 +120,8 @@
     LATITUDE: 4,
     LONGITUDE: 5,
 
-    //URL: 'http://isenseproject.org/api/v1/',
-    URL: 'http://rsense-dev.cs.uml.edu/api/v1/',
+    URL: 'http://isenseproject.org/api/v1/',
+    //URL: 'http://rsense-dev.cs.uml.edu/api/v1/',
     //URL: 'http://localhost:3000/api/v1/',
 
     getProject: function(projectId, recur) {
