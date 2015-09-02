@@ -1,10 +1,10 @@
 import requests,json,time,datetime
 
 # This is a wrapper for the iSENSE API
-# Docs are at http://isenseproject.org/api/v1/docs
+# Docs are at https://isenseproject.org/api/v1/docs
 
 # All API calls go through the following url
-BASE_URL = 'http://isenseproject.org/api/v1/'
+BASE_URL = 'https://isenseproject.org/api/v1/'
 #BASE_URL = 'http://rsense-dev.cs.uml.edu/api/v1/'
 
 
