@@ -42,14 +42,14 @@ import edu.uml.cs.isense.objects.RProjectField;
 
 public class API {
 	private final String version_major = "4";
-	private final String version_minor = "1";
+	private final String version_minor = "2";
 	private String version;
 
 	private static API instance = null;
 
 	private String baseURL = "";
-	private final String publicURL = "http://isenseproject.org/api/v1";
-	private final String devURL = "http://rsense-dev.cs.uml.edu/api/v1";
+	private final String publicURL = "https://isenseproject.org/api/v1";
+	private final String devURL = "https://rsense-dev.cs.uml.edu/api/v1";
 
 	String authToken = "";
 	RPerson currentUser;
