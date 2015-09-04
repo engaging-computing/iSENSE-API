@@ -250,7 +250,7 @@ class DataSet(object):
             response = iSenseAPI.editDataSet(credentials.getUsername(), credentials.getPassword(),
                 self.__id, data_dictionary)
         elif credentials.isKey():
-            response = iSenseAPI.editDataSetWithKey(credentials.getContribKey,
+            response = iSenseAPI.editDataSetWithKey(credentials.getContribKey(),
                 self.__id, data_dictionary)
 
         # After the data is uploaded refresh this data set object so it has the latest data 

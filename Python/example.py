@@ -51,7 +51,7 @@ print("\nNew Projects Name:")
 print(new_project.getName())
 
 # Add a key to the project
-new_project.addKey(user_credentials, "MyKeyLabel", "key")
+new_project.addKey(user_credentials, "key", "key") # Change first key to MyKeyLabel once API gets fixed
 key_credentials = iSense.Credentials(contrib_key="key", contrib_name="Python User")
 
 # Add fields to project
@@ -70,7 +70,7 @@ print lon_field.getName()
 # Data must be in the format {"fieldId": [data,data2,data3[], "fieldID2": [data, data2, data3]}
 print("\nData Set Count Before Upload:")
 print(new_project.getDataSetCount())
-data_to_be_uploaded = {str(num_field.getId()): [1, 2, 3] }
+data_to_be_uploaded = {str(num_field.getId()): [1, 2, 3, 4] }
 new_ds = new_project.createDataSet("My new data set", data_to_be_uploaded, user_credentials)
 print("\nData Set Count After Upload:")
 print(new_project.getDataSetCount())

@@ -143,7 +143,7 @@ def editDataSet(email, password, dataSetId, data):
 # Replaces an existing data set's data with new data (You must be the owner)
 def editDataSetWithKey(contribKey, dataSetId, data):
     url = BASE_URL + 'data_sets/' + str(dataSetId) + '/edit'
-    payload = {'contribution_key': contribKey, 'contributor_name': contribName, 'data': data}
+    payload = {'contribution_key': contribKey, 'data': data}
     
     data = json.dumps(payload)
     headers = {'Content-Type': 'application/json'}
