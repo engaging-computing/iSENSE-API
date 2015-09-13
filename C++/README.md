@@ -46,7 +46,8 @@ add the API files (api.cpp as well as the "include" directory) to the Xcode proj
 
 For more help with Xcode, [see the following site.](http://docs.millennialmedia.com/iOS-SDK/iOSAddingLinkerFlag.html)
 
-You can also check out the example project in the "Mac" directory in the [Teaching Github repo](https://github.com/isenseDev/Teaching) (ExampleCode / C++ / Projects / Mac).
+You can also check out the example project in the "Mac" directory in the
+[iSENSE Teaching Github repo](https://github.com/isenseDev/Teaching) (ExampleCode / C++ / Projects / Mac).
 
 You should also be able to use the provided Makefile for Linux.
 
@@ -63,17 +64,9 @@ Confirmed working in Windows 7, 8.1 (x64), Mac OS X 10.10.1 Yosemite and Ubuntu 
 
 ##NOTES:
 For some of these programs, a JSON library called picojson is used to serialize and parse JSON.
-[You can grab the code for that off the following github repo.](https://github.com/kazuho/picojson)
-
-It is also included it in the iSENSE Teaching GitHub Repository, inside the Projects directory in a
-zip called "include.zip". Unzip that zip and you will have picojson, as well as memfile.h and API.h.
-
 [The latest PicoJSON can be found here.](https://raw.githubusercontent.com/kazuho/picojson/master/picojson.h)
 
-You can also just git clone the repository using the following command:
-
-```
-git clone https://github.com/kazuho/picojson.git
-```
+It is also included it in the iSENSE API repository as a submodule, so if you git clone the API repository it will automatically
+git  clone the picojson repository.
 
 Picojson is contained in one header file called "picojson.h".
