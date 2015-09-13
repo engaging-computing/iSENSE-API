@@ -285,10 +285,10 @@ BOOST_AUTO_TEST_CASE(append_withDatasetID_byKey) {
   test.push_back("Text", "DatasetID Test --- Key");
   test.push_back("Timestamp", test.generate_timestamp());
 
-  BOOST_REQUIRE(test.check_append_key_byID(test_dataset_ID_key) == true);
-
   // Dump some data for testing
   test.debug();
+
+  BOOST_REQUIRE(test.check_append_key_byID(test_dataset_ID_key) == true);
 }
 
 
@@ -309,8 +309,10 @@ BOOST_AUTO_TEST_CASE(append_withDatasetName_byKey) {
   test.push_back("Text", "Dataset Name Test -- Key");
   test.push_back("Timestamp", test.generate_timestamp());
 
-  BOOST_REQUIRE(test.append_key_byName(test_dataset_name_key) == true);
+  test.append_key_byName(test_dataset_name_key);
 
   // Dump some data for testing
   test.debug();
+
+  BOOST_REQUIRE(test.append_key_byName(test_dataset_name_key) == true);
 }
