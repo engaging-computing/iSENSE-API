@@ -1,4 +1,4 @@
-C++ Example Code
+C++ API Code
 ================
 
 It is recommended that you compile any projects using the iSENSE C++ API code using either Linux or Mac OS X. The API code works in windows but it is not as easy to setup and requires using Visual Studios.
