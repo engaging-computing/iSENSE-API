@@ -1,3 +1,0 @@
-[submodule "C++/API/picojson"]
-	path = C++/API/picojson
-	url = git@github.com:kazuho/picojson.git
