@@ -949,8 +949,7 @@ bool iSENSE::append_key_byName(std::string dataset_name) {
 
   // If we didn't get any errors, call the append by ID function.
   if (dataset_ID != GET_ERROR) {
-    append_key_byID(dataset_ID);
-    return true;
+    return append_key_byID(dataset_ID);
   }
 
   // If we got here, we failed to find that dataset name in the current project.
@@ -1172,8 +1171,7 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
 
   // If we didn't get any errors, call the append by ID function.
   if (dataset_ID != GET_ERROR) {
-    append_key_byID(dataset_ID);
-    return true;
+    return append_email_byID(dataset_ID);
   }
 
   // If we got here, we failed to find that dataset name in the current project.
@@ -1201,6 +1199,7 @@ void iSENSE::format_upload_string(int post_type) {
 
     case APPEND_KEY:
       upload_data["contribution_key"] = value(contributor_key);
+      upload_data["contributor_name"] = value(contributor_label);
       upload_data["id"] = value(dataset_ID);
       break;
 

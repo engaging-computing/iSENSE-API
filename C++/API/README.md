@@ -32,3 +32,9 @@ make
 
 This will place all the standard IO into a text file called stdout.txt, and all
 of the standard errors will end up in a text file called stderr.txt.
+
+You can also use the following command to redirect all of Boost's error output to a file:
+
+```
+./tests.out --log_sink=fileName.log
+```

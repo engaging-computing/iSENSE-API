@@ -32,6 +32,20 @@ using namespace picojson;
  */
 
 
+// Constants for running C++ Tests
+const std::string test_project_ID = "1406";
+const std::string test_project_name = "C++ Testing ";
+const std::string test_dataset_name = "Testing ";
+const std::string test_dataset_ID_email = "11366";
+const std::string test_dataset_ID_key = "11367";
+const std::string test_email = "j@j.j";
+const std::string test_password = "j";
+const std::string test_project_key = "123";
+const std::string test_project_label = "Boost";
+const std::string test_search_true = "test";
+const std::string test_search_empty = "abcdefghig";
+
+
 /*
  * This is a derived class to quickly test the append_byID functions.
  * It is derived from iSENSE, and by doing this I can create a public function
@@ -54,42 +68,38 @@ class Test: public iSENSE {
 };
 
 
-// Ensure the CheckUser() method works.
+// Test the Check User method.
 BOOST_AUTO_TEST_CASE(get_check_user) {
   iSENSE test;
 
   // Add test project
-  test.set_project_ID("929");
-  test.set_project_title("Boost " + test.generate_timestamp());
+  test.set_project_ID(test_project_ID);
+  test.set_project_title(test_dataset_name + test.generate_timestamp());
 
   // This is a valid email / password - so it should return true.
-  BOOST_REQUIRE(test.set_email_password("j@j.j", "j") == true);
+  BOOST_REQUIRE(test.set_email_password(test_email, test_password) == true);
 }
 
 
 // Test the GET project fields method.
 BOOST_AUTO_TEST_CASE(get_project_fields) {
-  iSENSE test_true("929", "test ", "BOOST Test", "123");
 
-  // Make the title unique
-  test_true.set_project_title("Boost " + test_true.generate_timestamp());
-
-  // Test the GET method, should work for this project ID
+  // This iSENSE object should work.
+  iSENSE test_true(test_project_ID, test_project_name, test_project_label, test_project_key);
   BOOST_REQUIRE(test_true.get_project_fields() == true);
 
+  // This one should fail.
   iSENSE test_false;
-
-  // This should fail.
   BOOST_REQUIRE(test_false.get_project_fields() == false);
 }
 
 
 // Test the get_datasets / media objects method
 BOOST_AUTO_TEST_CASE(get_datasets_and_mediaobjects) {
-  iSENSE test_true("929", "test ", "BOOST Test", "123");
+  iSENSE test_true(test_project_ID, test_project_name, test_project_label, test_project_key);
 
   // Make the title unique
-  test_true.set_project_title("Boost " + test_true.generate_timestamp());
+  test_true.set_project_title(test_dataset_name + test_true.generate_timestamp());
 
   // Test the GET method, should work for this project ID
   BOOST_REQUIRE(test_true.get_datasets_and_mediaobjects() == true);
@@ -103,23 +113,19 @@ BOOST_AUTO_TEST_CASE(get_datasets_and_mediaobjects) {
 
 // Test the search project method
 BOOST_AUTO_TEST_CASE(get_projects_search) {
-  iSENSE test_true("929", "test ", "BOOST Test", "123");
-
-  std::string search_term = "hello";
+  iSENSE test_true(test_project_ID, test_project_name, test_project_label, test_project_key);
 
   std::vector<std::string> project_titles;
-  project_titles = test_true.get_projects_search(search_term);
+  project_titles = test_true.get_projects_search(test_search_true);
 
-  BOOST_REQUIRE(project_titles.empty() == false);
+  BOOST_REQUIRE(project_titles.empty() == false);             // This should not be empty.
 
   iSENSE test_false;
 
-  search_term = EMPTY;
-
   project_titles.clear();
-  project_titles = test_false.get_projects_search(search_term);
+  project_titles = test_false.get_projects_search(test_search_empty);
 
-  BOOST_REQUIRE(project_titles.empty() == true);
+  BOOST_REQUIRE(project_titles.empty() == true);              // This should be empty, since its a blank search term.
 }
 
 
@@ -151,7 +157,7 @@ BOOST_AUTO_TEST_CASE(get_dataset_ID) {
   // Try and get dataset ID for the given dataset name.
   std::string datasetID = test_true.get_dataset_ID("MLB Team Statistics 2013");
 
-  BOOST_REQUIRE(datasetID == "1190");
+  BOOST_REQUIRE(datasetID == "2801");
 
   iSENSE test_false;
 
@@ -185,12 +191,13 @@ BOOST_AUTO_TEST_CASE(get_field_ID) {
 }
 
 
-// Test POSTing with Contributor keys
+// Test POST with Contributor keys
 BOOST_AUTO_TEST_CASE(post_JSON_withKey) {
-  iSENSE test("929", "test ", "BOOST Test", "123");
+  std::string project_title = "POST Test with Key ";
+  iSENSE test(test_project_ID, project_title, test_project_label, test_project_key);
 
   // Make the title unique
-  test.set_project_title("Boost " + test.generate_timestamp());
+  test.set_project_title(project_title  + test.generate_timestamp());
 
   // Push some data back
   test.push_back("Timestamp", test.generate_timestamp());
@@ -201,13 +208,15 @@ BOOST_AUTO_TEST_CASE(post_JSON_withKey) {
 }
 
 
-// Test POSTing with Email/Password
+// Test POST with Email/Password
 BOOST_AUTO_TEST_CASE(post_JSON_withEmail) {
-  iSENSE test("929", "test ", "BOOST Test", "123");
+  std::string project_title = "POST Test with Email ";
+  iSENSE test;
 
   // Make the title unique + set email/password
-  test.set_project_title("Boost " + test.generate_timestamp());
-  test.set_email_password("j@j.j", "j");
+  test.set_project_ID(test_project_ID);
+  test.set_project_title(project_title  + test.generate_timestamp());
+  test.set_email_password(test_email, test_password);
 
   // Push some data back
   test.push_back("Timestamp", test.generate_timestamp());
@@ -222,26 +231,19 @@ BOOST_AUTO_TEST_CASE(post_JSON_withEmail) {
 // (Email / Password)
 BOOST_AUTO_TEST_CASE(append_withDatasetID_byEmail) {
   Test test;
-  std::string title, ID, dataset_ID, email, password, letters, num, timestamp;
-
-  // This will be a test of the append method.
-  ID = "929";
-  title = "valid";
-  email = "j@j.j";
-  password = "j";
-  dataset_ID = "7659";
+  std::string test_dataset_name_email = "C++ Dataset Append Test Email";
 
   // Add project info / dataset info to the object
-  test.set_project_ID(ID);
-  test.check_set_dataset_ID(dataset_ID);
-  test.set_project_title(title);
-  test.set_email_password(email, password);
+  test.set_project_ID(test_project_ID);
+  test.set_project_title(test_dataset_name_email);
+  test.check_set_dataset_ID(test_dataset_ID_email);
+  test.set_email_password(test_email, test_password);
 
   test.push_back("Number", "123456789");
-  test.push_back("Text", "THIS");
+  test.push_back("Text", "Datset ID Test - Email");
   test.push_back("Timestamp", test.generate_timestamp());
 
-  BOOST_REQUIRE(test.check_append_email_byID(dataset_ID) == true);
+  BOOST_REQUIRE(test.check_append_email_byID(test_dataset_ID_email) == true);
 }
 
 
@@ -249,26 +251,19 @@ BOOST_AUTO_TEST_CASE(append_withDatasetID_byEmail) {
 // (Email / Password)
 BOOST_AUTO_TEST_CASE(append_withDatasetName_byEmail) {
   iSENSE test;
-  std::string title, ID, dataset_name, email, password, letters, num, timestamp;
-
-  // This will be a test of the append method.
-  ID = "929";
-  title = "valid";
-  email = "j@j.j";
-  password = "j";
-  dataset_name = "testing";
+  std::string test_dataset_name_email = "C++ Dataset Append Test Email";
 
   // Add project info / dataset info to the object
-  test.set_project_ID(ID);
-  test.set_project_title(title);
-  test.set_email_password(email, password);
+  test.set_project_ID(test_project_ID);
+  test.set_project_title(test_dataset_name_email);
+  test.set_email_password(test_email, test_password);
 
   // Push data back to the object.
   test.push_back("Number", "123456789");
-  test.push_back("Text", "THIS");
+  test.push_back("Text", "Dataset Name Test - Email");
   test.push_back("Timestamp", test.generate_timestamp());
 
-  BOOST_REQUIRE(test.append_email_byName(dataset_name) == true);
+  BOOST_REQUIRE(test.append_email_byName(test_dataset_name_email) == true);
 }
 
 
@@ -276,25 +271,24 @@ BOOST_AUTO_TEST_CASE(append_withDatasetName_byEmail) {
 // (Contributor keys)
 BOOST_AUTO_TEST_CASE(append_withDatasetID_byKey) {
   Test test;
-  std::string title, ID, dataset_ID, key, letters, num, timestamp;
-
-  // This will be a test of the append method.
-  title = "this works?";
-  ID = "1029";
-  key = "key";
-  dataset_ID = "7795";
+  std::string test_dataset_name_key = "C++ Dataset Append Test Key";
 
   // Add project info / dataset info to the object
-  test.set_project_ID(ID);
-  test.check_set_dataset_ID(dataset_ID);
-  test.set_project_title(title);
-  test.set_contributor_key(key);
+  test.set_project_ID(test_project_ID);
+  test.set_project_title(test_project_name);
+  test.check_set_dataset_ID(test_dataset_ID_key);
+  test.set_project_label(test_project_label);
+  test.set_contributor_key(test_project_key);
 
-  timestamp = test.generate_timestamp();
+  // Push data back to the object.
+  test.push_back("Number", "123456789");
+  test.push_back("Text", "DatasetID Test --- Key");
+  test.push_back("Timestamp", test.generate_timestamp());
 
-  test.push_back("Number", "999999");
+  BOOST_REQUIRE(test.check_append_key_byID(test_dataset_ID_key) == true);
 
-  BOOST_REQUIRE(test.check_append_key_byID(dataset_ID) == true);
+  // Dump some data for testing
+  test.debug();
 }
 
 
@@ -302,26 +296,21 @@ BOOST_AUTO_TEST_CASE(append_withDatasetID_byKey) {
 // (Contributor keys)
 BOOST_AUTO_TEST_CASE(append_withDatasetName_byKey) {
   iSENSE test;
-  std::string title, ID, dataset_name, label, key;
-
-  // This will be a test of the append method.
-  ID = "1029";
-  title = "test";
-  label = "BOOST Test";
-  key = "key";
-  dataset_name = "this works?";
+  std::string test_dataset_name_key = "C++ Dataset Append Test Key";
 
   // Add project info / dataset info to the object
-  test.set_project_ID(ID);
-  test.set_project_title(title);
-  test.set_project_label(label);
-  test.set_contributor_key(key);
+  test.set_project_ID(test_project_ID);
+  test.set_project_title(test_project_name);
+  test.set_project_label(test_project_label);
+  test.set_contributor_key(test_project_key);
 
   // Push data back to the object.
   test.push_back("Number", "123456789");
-  test.push_back("Text", "THIS");
+  test.push_back("Text", "Dataset Name Test -- Key");
   test.push_back("Timestamp", test.generate_timestamp());
 
-  BOOST_REQUIRE(test.append_key_byName(dataset_name) == true);
-}
+  BOOST_REQUIRE(test.append_key_byName(test_dataset_name_key) == true);
 
+  // Dump some data for testing
+  test.debug();
+}
