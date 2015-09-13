@@ -10,7 +10,7 @@
 #include <curl/curl.h>
 #endif
 
-#include "picojson.h"
+#include "picojson/picojson.h"
 #include "memfile.h"
 #include <ctime>
 #include <iostream>
