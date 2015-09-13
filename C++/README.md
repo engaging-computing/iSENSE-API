@@ -13,6 +13,14 @@ sudo apt-get update
 sudo apt-get install curl libcurl4-gnutls-dev
 ```
 
+In order to run the makefile included in the API directory, you will need to install the Boost unit testing library. You can either find this library at the Boost website or in a Debian based Linux distribution just run the following command:
+
+(note: requires 100MB of available storage space)
+
+```
+sudo apt-get install libboost-test-dev
+```
+
 If those prerequisites are not installed, you may see the following error:
 
 ```
