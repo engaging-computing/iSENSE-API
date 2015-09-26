@@ -1,7 +1,10 @@
 C++ API Code
 ================
 
-It is recommended that you compile any projects using the iSENSE C++ API code using either Linux or Mac OS X. The API code works in windows but it is not as easy to setup and requires using Visual Studios.
+It is recommended that you compile any projects using the iSENSE C++ API code
+using either Linux or Mac OS X.
+
+The API code works in windows but it is not as easy to setup and requires using Visual Studios.
 
 Some of these examples use cURL through the libcURL library for C. Below is the setup guide for various operating systems.
 
@@ -64,9 +67,9 @@ Confirmed working in Windows 7, 8.1 (x64), Mac OS X 10.10.1 Yosemite and Ubuntu 
 
 ##NOTES:
 For some of these programs, a JSON library called picojson is used to serialize and parse JSON.
+
 [The latest PicoJSON can be found here.](https://raw.githubusercontent.com/kazuho/picojson/master/picojson.h)
 
-It is also included it in the iSENSE API repository as a submodule, so if you git clone the API repository it will automatically
-git  clone the picojson repository.
+It is also included it in the iSENSE API repository as a submodule, so if you git clone the API repository it will automatically git  clone the picojson repository.
 
 Picojson is contained in one header file called "picojson.h".

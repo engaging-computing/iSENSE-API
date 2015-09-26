@@ -9,8 +9,8 @@
  */
 
 typedef struct {
-  char* data;       // response data from server
-  size_t size;        // response size of data
+  char* data;       	// response data from server
+  size_t size;        	// response size of data
 } MEMFILE;
 
 MEMFILE*  memfopen();

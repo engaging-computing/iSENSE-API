@@ -70,11 +70,11 @@ public:
   void set_project_all(std::string proj_ID, std::string proj_title,
                        std::string label, std::string contr_key);
 
+  // These can be used to manually project data. Be sure to set a contributor
+  // key or email / password as well!
   void set_project_ID(std::string proj_ID);
   void set_project_title(std::string proj_title);
   void set_contributor_key(std::string proj_key);
-
-  // Optional, by default the label will be "cURL"
   void set_project_label(std::string proj_label);
 
   // This should be used for setting the email / password for a project.
@@ -164,6 +164,10 @@ public:
   // Helper methods
   std::string get_dataset_ID(std::string dataset_name);
   std::string get_field_ID(std::string field_name);
+
+  // Error methods - makes error checking simple.
+  bool empty_project_check(int type, std::string method);
+  bool check_http_code(int http_code, std::string method);
 
 /*  Future functions to be implemented at a later date.
       //  Editing API calls (not yet implemented)
