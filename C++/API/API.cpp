@@ -422,54 +422,7 @@ std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
   return vector_data;     // This should be empty, or may not contain all the data.
 }
 
-std::string iSENSE::get_field_ID(std::string field_name) {
-  array::iterator it;
 
-  // Check and see if the fields object is empty
-  if (fields.is<picojson::null>() == true) {
-    std::cerr << "\nError in method: get_field_ID()\n";
-    std::cerr << "Field array wasn't set up.";
-    std::cerr << "Have you pulled the fields off iSENSE?\n";
-    return GET_ERROR;
-  }
-
-  // We made an iterator above, that will let us run through the fields
-  for (it = fields_array.begin(); it != fields_array.end(); it++) {
-    object obj = it->get<object>();                    // Get the current object
-    std::string field_ID = obj["id"].to_str();         // Grab the field ID
-    std::string name = obj["name"].get<std::string>(); // Grab the field name
-
-    if (name == field_name) {   // Found the given field name
-      return field_ID;          // So return the field ID
-    }
-  }
-
-  std::cerr << "\nError in method: get_field_ID()\n";
-  std::cerr << "Unable to find the field ID for the given field name.\n";
-  return GET_ERROR;
-}
-
-std::string iSENSE::get_dataset_ID(std::string dataset_name) {
-  array::iterator it;
-
-  // Check and see if the datasets object is empty
-  // Need to find out how to do this using picojson arrays!
-
-  // This is similar to the get_field_ID function loop.
-  for (it = data_sets.begin(); it != data_sets.end(); it++) {
-    object obj = it->get<object>();                    // Get the current object
-    std::string dataset_ID = obj["id"].to_str();         // Grab the dataset ID
-    std::string name = obj["name"].get<std::string>(); // Grab the dataset name
-
-    if (name == dataset_name) {   // We found the dataset name
-      return dataset_ID;          // So return the dataset ID
-    }
-  }
-
-  std::cerr << "\nError in method: get_dataset_ID()\n";
-  std::cerr << "Unable to find the dataset ID for the given dataset name.\n";
-  return GET_ERROR;
-}
 
 bool iSENSE::post_json_key() {
   if(!empty_project_check(POST_KEY, "post_json_key()")) {
@@ -534,7 +487,6 @@ bool iSENSE::append_key_byName(std::string dataset_name) {
   // If we got here, we failed to find that dataset name in the current project.
   std::cerr << "\nError in method: append_key_byName()\n";
   std::cerr << "Failed to find the dataset name in project # " << project_ID;
-  std::cerr << "\nMake sure to type the exact name, as it appears on iSENSE.\n";
   return false;
 }
 
@@ -571,13 +523,63 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
   // If we got here, we failed to find that dataset name in the current project.
   std::cerr << "\nError in method: append_email_byName()\n";
   std::cerr << "Failed to find the dataset name in project # " << project_ID;
-  std::cerr << "\nMake sure to type the exact name, as it appears on iSENSE.\n";
   return false;
 }
 
 //******************************************************************************
 // Below this point are helper functions. Users should only call functions
 // above this point, as these are all called by the API functions.
+
+// Convert field name to field ID
+std::string iSENSE::get_field_ID(std::string field_name) {
+  array::iterator it;
+
+  // Check and see if the fields object is empty
+  if (fields.is<picojson::null>() == true) {
+    std::cerr << "\nError in method: get_field_ID()\n";
+    std::cerr << "Field array wasn't set up.";
+    std::cerr << "Have you pulled the fields off iSENSE?\n";
+    return GET_ERROR;
+  }
+
+  // We made an iterator above, that will let us run through the fields
+  for (it = fields_array.begin(); it != fields_array.end(); it++) {
+    object obj = it->get<object>();                    // Get the current object
+    std::string field_ID = obj["id"].to_str();         // Grab the field ID
+    std::string name = obj["name"].get<std::string>(); // Grab the field name
+
+    if (name == field_name) {   // Found the given field name
+      return field_ID;          // So return the field ID
+    }
+  }
+
+  std::cerr << "\nError in method: get_field_ID()\n";
+  std::cerr << "Unable to find the field ID for the given field name.\n";
+  return GET_ERROR;
+}
+
+// Convert dataset name to dataset ID
+std::string iSENSE::get_dataset_ID(std::string dataset_name) {
+  array::iterator it;
+
+  // Check and see if the datasets object is empty
+  // Need to find out how to do this using picojson arrays!
+
+  // This is similar to the get_field_ID function loop.
+  for (it = data_sets.begin(); it != data_sets.end(); it++) {
+    object obj = it->get<object>();                    // Get the current object
+    std::string dataset_ID = obj["id"].to_str();         // Grab the dataset ID
+    std::string name = obj["name"].get<std::string>(); // Grab the dataset name
+
+    if (name == dataset_name) {   // We found the dataset name
+      return dataset_ID;          // So return the dataset ID
+    }
+  }
+
+  std::cerr << "\nError in method: get_dataset_ID()\n";
+  std::cerr << "Unable to find the dataset ID for the given dataset name.\n";
+  return GET_ERROR;
+}
 
 // Format JSON Upload strings.
 void iSENSE::format_upload_string(int post_type) {
