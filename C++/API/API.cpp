@@ -11,14 +11,28 @@ iSENSE::iSENSE() {                  // Default constructor
   contributor_label = "label";
   email = EMPTY;
   password = EMPTY;
+
+  // This should be called ONCE, and it setups libcurl.
+  curl_global_init(CURL_GLOBAL_ALL);
 }
 
-iSENSE::iSENSE(std::string proj_ID, std::string proj_title, // Constructor with parameters
+// Constructor with parameters
+iSENSE::iSENSE(std::string proj_ID, std::string proj_title,
                std::string label, std::string contr_key) {
   set_project_ID(proj_ID);
   set_project_title(proj_title);
   set_project_label(label);
   set_contributor_key(contr_key);
+
+  // This should be called ONCE for the entire programs lifetime.
+  // This is simply to setup libcurl.
+  curl_global_init(CURL_GLOBAL_ALL);
+}
+
+// Override the constructor, we need to make sure we cleanup libcurl.
+iSENSE::~iSENSE() {
+  // Make sure to cleanup libcurl exactly ONCE.
+  curl_global_cleanup();
 }
 
 // Similar to the constructor with parameters, but can be called at anytime
@@ -139,22 +153,25 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
                          + search_term + "&sort=updated_at&order=DESC";
   std::vector<std::string> project_titles;    // Vector of project titles.
 
-  CURL *curl = curl_easy_init();      // cURL object
+  curl = curl_easy_init();            // get curl handle
   MEMFILE* json_file = memfopen();    // Writing JSON to this file.
-  long http_code = 0;                 // HTTP status code
 
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, get_search.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memfwrite);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, json_file);
 
-    curl_easy_perform(curl);      // Perform the request
+    // Perform the request, res will get the return code.
+    res = curl_easy_perform(curl);
+
+    // Get HTTP code for error checking.
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
   }
 
-  curl_easy_cleanup(curl);      // Clean up cURL
-  curl_global_cleanup();
-
+  // Check for errors.
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+  }
   if (http_code != HTTP_AUTHORIZED) {   // Didn't get HTTP code 200.
     std::cerr << "\nError in: get_projects_search(string search_term) \n";
     std::cerr << "Project search failed.\n";
@@ -203,6 +220,8 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
     project_titles.push_back(name);       // Push the name back into the vector.
   }
 
+  // Always cleanup
+  curl_easy_cleanup(curl);
   memfclose(json_file);
   return project_titles;     // Return a vector of project titles
 }
@@ -218,8 +237,7 @@ bool iSENSE::get_check_user() {
 
   get_UserURL = devURL + "/users/myInfo?email=" + email + "&password=" + password;
 
-  CURL *curl = curl_easy_init();          // cURL object
-  long http_code = 0;                     // HTTP status code
+  curl = curl_easy_init();            // get curl handle
 
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, get_UserURL.c_str());       // GET URL
@@ -227,8 +245,8 @@ bool iSENSE::get_check_user() {
     curl_easy_perform(curl);                                        // Perform the request
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);    // get HTTP code.
   }
+
   curl_easy_cleanup(curl);    // Always cleanup.
-  curl_global_cleanup();
 
   if (http_code == HTTP_AUTHORIZED) {
     return true;
@@ -245,9 +263,8 @@ bool iSENSE::get_project_fields() {
 
   get_URL = devURL + "/projects/" + project_ID;
 
-  CURL *curl = curl_easy_init();      // cURL object
+  curl = curl_easy_init();            // get curl handle
   MEMFILE* json_file = memfopen();    // Writing JSON to this file.
-  long http_code = 0;                 // HTTP status code
 
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());         // GET URL
@@ -257,7 +274,6 @@ bool iSENSE::get_project_fields() {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);  // Store HTTP Code.
   }
   curl_easy_cleanup(curl);              // Clean up cURL
-  curl_global_cleanup();
 
   if (http_code != HTTP_AUTHORIZED) {   // Check for valid HTTP code.
     std::cerr << "Error in method: get_project_fields()\n";
@@ -297,9 +313,8 @@ bool iSENSE::get_datasets_and_mediaobjects() {
   // ALL datasets in that project and ALL media objects in that project
   get_URL = devURL + "/projects/" + project_ID + "?recur=true";
 
-  CURL *curl = curl_easy_init();      // cURL object
+  curl = curl_easy_init();            // get curl handle
   MEMFILE* json_file = memfopen();    // Writing JSON to this file.
-  long http_code = 0;                 // HTTP status code
 
   if (curl) {
     curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());         // GET URL
@@ -309,7 +324,6 @@ bool iSENSE::get_datasets_and_mediaobjects() {
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);  // Get HTTP Code
   }
   curl_easy_cleanup(curl);    // Clean up cURL
-  curl_global_cleanup();
 
   if (http_code != HTTP_AUTHORIZED) {
     std::cerr << "\nError in: get_datasets_and_mediaobjects().\n";
@@ -430,7 +444,7 @@ bool iSENSE::post_json_key() {
   }
 
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
-  int http_code = post_data_function(POST_KEY);
+  http_code = post_data_function(POST_KEY);
 
   if(!check_http_code(http_code, "post_json_key()")) {
     return false;
@@ -445,7 +459,7 @@ bool iSENSE::post_json_email() {
   }
 
   upload_URL = devURL + "/projects/" + project_ID + "/jsonDataUpload";
-  int http_code = post_data_function(POST_EMAIL);
+  http_code = post_data_function(POST_EMAIL);
 
   if(!check_http_code(http_code, "post_json_email()")) {
     return false;
@@ -462,7 +476,7 @@ bool iSENSE::append_key_byID(std::string dataset_ID) {
 
   set_dataset_ID(dataset_ID);                       // Set the dataset_ID
   upload_URL = devURL + "/data_sets/append";        // Set the append API URL
-  int http_code = post_data_function(APPEND_KEY);   // Call helper function.
+  http_code = post_data_function(APPEND_KEY);       // Call helper function.
 
   if(!check_http_code(http_code, "append_key_byID")) {
     return false;
@@ -498,7 +512,7 @@ bool iSENSE::append_email_byID(std::string dataset_ID) {
 
   set_dataset_ID(dataset_ID);                           // Set the dataset_ID
   upload_URL = devURL + "/data_sets/append";            // Set the API URL
-  int http_code = post_data_function(APPEND_EMAIL);     // Call helper function.
+  http_code = post_data_function(APPEND_EMAIL);         // Call helper function.
 
   if(!check_http_code(http_code, "append_email_byID()")) {
     return false;
@@ -662,7 +676,6 @@ int iSENSE::post_data_function(int post_type) {
 
   CURL *curl = curl_easy_init();          // cURL object
   long http_code = 0;                     // HTTP status code
-  curl_global_init(CURL_GLOBAL_DEFAULT);  // In windows, init the winsock stuff
 
   struct curl_slist *headers = NULL;      // Headers for uploading via JSON
   headers = curl_slist_append(headers, "Accept: application/json");
@@ -687,7 +700,6 @@ int iSENSE::post_data_function(int post_type) {
     curl_easy_perform(curl);// Perform the request, res will get the return code
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
     curl_easy_cleanup(curl);          // Clean up curl.
-    curl_global_cleanup();
 
     return http_code;                 // Return the HTTP code we get from curl.
   }
@@ -840,7 +852,6 @@ void iSENSE::debug() {
 
 //******************************************************************************
 // These are needed for picojson & libcURL.
-// Declared in memfile.h but defined below.
 MEMFILE*  memfopen() {
   MEMFILE* mf = (MEMFILE*) malloc(sizeof(MEMFILE));
   mf->data = NULL;
@@ -849,18 +860,13 @@ MEMFILE*  memfopen() {
 }
 
 void memfclose(MEMFILE* mf) {
-  // Double check to make sure that mf exists.
-  if (mf == NULL) {
+  if (mf == NULL) {                 // Double check to make sure that mf exists.
     return;
   }
-
-  // OK to free the char array
-  if (mf != NULL && mf->data) {
+  if (mf != NULL && mf->data) {     // OK to free the char array
     free(mf->data);
   }
-
-  // And OK to free the structure
-  free(mf);
+  free(mf);                         // And OK to free the structure
 }
 
 // Simple function only used by the get_check_user function to
@@ -878,7 +884,6 @@ size_t memfwrite(char* ptr, size_t size, size_t nmemb, void* stream) {
   } else {
     mf->data = (char*) realloc(mf->data, mf->size + block);
   }
-
   if (mf->data) {
     memcpy(mf->data + mf->size, ptr, block);
     mf->size += block;

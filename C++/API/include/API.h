@@ -11,12 +11,11 @@
 #endif
 
 #include "picojson/picojson.h"
-#include "memfile.h"
-#include <ctime>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+#include <ctime>
 
 // For picojson
 using namespace picojson;
@@ -46,12 +45,32 @@ const int CURL_ERROR = -1;
 const std::string GET_ERROR = "ERROR";
 const std::string EMPTY = "-----";
 
+/*
+ *    This is from the picojson example page
+ *    I use it to save the JSON from iSENSE to memory (temporary)
+ *    See the following URL for an example:
+ *    https://github.com/kazuho/picojson/blob/master/examples/github-issues.cc
+ */
+typedef struct {
+  char* data;         // response data from server
+  size_t size;          // response size of data
+} MEMFILE;
+
+MEMFILE*  memfopen();
+void memfclose(MEMFILE* mf);
+size_t suppress_output(char* ptr, size_t size, size_t nmemb, void* stream);
+size_t memfwrite(char* ptr, size_t size, size_t nmemb, void* stream);
+char* memfstrdup(MEMFILE* mf);
+
 class iSENSE {
 public:
   // Constructors
   iSENSE();
   iSENSE(std::string proj_ID, std::string proj_title,
          std::string label, std::string contr_key);
+
+  // Destructor for cleaning up stuff.
+  ~iSENSE();
 
   // Similar to the constructor with parameters, but called after
   // the object is created. This way you can change the title/project ID/etc.
@@ -73,7 +92,7 @@ public:
   void debug();         // For debugging, this method dumps all the data.
 
   /*  This function will push data back to the map.
-   *  User must give the pushback function the following:
+   *  User must give the push_back function the following:
    *    1. Field name (as seen on iSENSE)
    *    2. Some data (in string format). For numbers, use std::to_string.
    *
@@ -194,6 +213,14 @@ private:
   std::string contributor_label;  // Label for the key, by default "cURL"
   std::string email;              // Email to be used to upload the data
   std::string password;           // Password to be used with an email address
+
+  // libcurl objects / variables. Users should ignore this.
+  // Defined once as the libcurl tutorial says to do:
+  // http://curl.haxx.se/libcurl/c/libcurl-tutorial.html
+  CURL *curl;           // curl handle
+  CURLcode res;         // curl response code
+  MEMFILE* json_file;   // JSON file in memory.
+  long http_code;       // HTTP status code
 };
 
 #endif

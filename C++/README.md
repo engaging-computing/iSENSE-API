@@ -4,9 +4,11 @@ C++ API Code
 It is recommended that you compile any projects using the iSENSE C++ API code
 using either Linux or Mac OS X.
 
-The API code works in windows but it is not as easy to setup and requires using Visual Studios.
+The API code works in windows but it is not as easy to setup and requires using
+Visual Studios.
 
-Some of these examples use cURL through the libcURL library for C. Below is the setup guide for various operating systems.
+The C++ API uses the libcurl library for C / C++.
+Below is the setup guide for various operating systems.
 
 ##Linux
 You can get libcurl on Linux (Ubuntu/Debian) by running the following commands:
@@ -16,20 +18,40 @@ sudo apt-get update
 sudo apt-get install curl libcurl4-gnutls-dev
 ```
 
-In order to run the makefile included in the API directory, you will need to install the Boost unit testing library. You can either find this library at the Boost website or in a Debian based Linux distribution just run the following command:
-
-(note: requires 100MB of available storage space)
+If you do not install libcurl, you will see the following error:
 
 ```
+g++ -c tests.cpp -Wall -Werror -pedantic -std=c++0x -lcurl
+In file included from tests.cpp:1:0:
+include/API.h:10:23: fatal error: curl/curl.h: No such file or directory
+ #include <curl/curl.h>
+                       ^
+compilation terminated.
+make: *** [tests.o] Error 1
+```
+
+In order to run the makefile included in the API directory, you will need to
+install the Boost unit testing library. You can either find this library at the
+Boost website or in a Debian based Linux distribution (like Ubuntu) just run the
+following command:
+
+(note: requires ~100MB of available storage space)
+
+```
+sudo apt-get update
 sudo apt-get install libboost-test-dev
 ```
 
-If those prerequisites are not installed, you may see the following error:
+If you do not install the boost unit testing library, you will see the following
+error:
 
 ```
-g++ -O0 -g -Wall -Wextra -pedantic-errors  -w -std=c++11 POST_simple.cpp -o simple.out -lcurl
-POST_simple.cpp:1:65: fatal error: curl/curl.h: No such file or directory
-#include <curl/curl.h>
+g++ -c tests.cpp -Wall -Werror -pedantic -std=c++0x -lcurl
+tests.cpp:13:36: fatal error: boost/test/unit_test.hpp: No such file or directory
+ #include <boost/test/unit_test.hpp>
+                                    ^
+compilation terminated.
+make: *** [tests.o] Error 1
 ```
 
 When compiling with curl, be sure to include "-lcurl" at the end of the gcc/g++ command.
@@ -39,6 +61,10 @@ Example:
 ```
 g++ GET_basic_curl.cpp -lcurl
 ```
+
+You should also use the provided Makefile for running the C++ tests. You can
+modify this Makefile to run your own programs, or see the iSENSE/Teaching
+repository for examples on using the C++ API.
 
 ##MacOS X
 MacOS users should have curl / libcurl installed by default.
@@ -66,10 +92,11 @@ Confirmed working in Windows 7, 8.1 (x64), Mac OS X 10.10.1 Yosemite and Ubuntu 
 
 
 ##NOTES:
-For some of these programs, a JSON library called picojson is used to serialize and parse JSON.
+The C++ API wrapper also uses a JSON library called picojson to serialize and parse JSON.
 
 [The latest PicoJSON can be found here.](https://raw.githubusercontent.com/kazuho/picojson/master/picojson.h)
 
-It is also included it in the iSENSE API repository as a submodule, so if you git clone the API repository it will automatically git  clone the picojson repository.
+It is also included it in the iSENSE API repository as a submodule, so if you
+git clone the API repository it will automatically git  clone the picojson repository.
 
 Picojson is contained in one header file called "picojson.h".
