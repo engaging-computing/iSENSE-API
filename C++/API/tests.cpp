@@ -117,6 +117,7 @@ BOOST_AUTO_TEST_CASE(get_projects_search) {
 
   std::vector<std::string> project_titles;
   project_titles = test_true.get_projects_search(test_search_true);
+  //test_true.debug();
 
   BOOST_REQUIRE(project_titles.empty() == false);             // This should not be empty.
 

@@ -148,17 +148,13 @@ void iSENSE::push_vector(std::string field_name, std::vector<std::string> data) 
 
 // Searches for projects with the search term.
 std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
-  get_URL = devURL + "/projects?utf8=true&search=" + search_term + "&sort=updated_at&order=DESC";
+  get_URL = devURL + "/projects?&search=" + search_term;
   std::vector<std::string> project_titles;    // Vector of project titles.
 
   http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
   // Check for errors. We need to get a code 200 for this method.
-  if (http_code != HTTP_AUTHORIZED) {
-    std::cerr << "\nError in: get_projects_search(string search_term) \n";
-    std::cerr << "Project search failed.\n";
-    std::cerr << "Something with either curl, your Internet connection, \n";
-    std::cerr << "iSENSE or something else failed.\n";
+  if( !check_http_code(http_code, "get_projects_search") ) {
     return project_titles;                            // Return an empty vector
   }
 
@@ -208,7 +204,6 @@ bool iSENSE::get_check_user() {
   }
 
   get_URL = devURL + "/users/myInfo?email=" + email + "&password=" + password;
-
   http_code = get_data_funct(GET_QUIET);         // quietly get data off iSENSE.
 
   if (http_code == HTTP_AUTHORIZED) {
@@ -225,41 +220,24 @@ bool iSENSE::get_project_fields() {
   }
 
   get_URL = devURL + "/projects/" + project_ID;
+  http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
-  curl = curl_easy_init();            // get curl handle
-  MEMFILE* json_file = memfopen();    // Writing JSON to this file.
-
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());         // GET URL
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memfwrite);     // Write function.
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, json_file);         // JSON saved here.
-    curl_easy_perform(curl);                                      // peform the GET request
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);  // Store HTTP Code.
+  // Check for errors. We need to get a code 200 for this method.
+  if( !check_http_code(http_code, "get_projects_fields") ) {
+    return project_titles;                            // Return an empty vector
   }
-  curl_easy_cleanup(curl);              // Clean up cURL
 
-  if (http_code != HTTP_AUTHORIZED) {   // Check for valid HTTP code.
-    std::cerr << "Error in method: get_project_fields()\n";
-    std::cerr << "GET project fields failed. Project ID may be invalid.\n";
-    memfclose(json_file);   // Close the memfile
+  // Parse the JSON file, just like the main page of PicoJSON does.
+  std::string errors = parse(get_data, json_str);
 
-    return false;
-  }
-  std::string errors;
-
-  // Parse the JSON file.
-  parse(get_data, json_file->data, json_file->data + json_file->size, &errors);
-  memfclose(json_file);   // Close the memfile
-
-  if (!errors.empty()) {    // If we have errors, print them out and quit.
+  if ( !errors.empty() ) {    // If we have errors, print them out and quit.
     std::cerr << "\nError parsing JSON file in method: get_project_fields()\n";
     std::cerr << "Error was: " << errors;
-
     return false;
   }
+
   fields = get_data.get("fields");      // Save the fields to the field array
   fields_array = fields.get<array>();
-
   return true;
 }
 
@@ -275,35 +253,19 @@ bool iSENSE::get_datasets_and_mediaobjects() {
   // The "?recur=true" will make iSENSE return:
   // ALL datasets in that project and ALL media objects in that project
   get_URL = devURL + "/projects/" + project_ID + "?recur=true";
-
-  curl = curl_easy_init();            // get curl handle
-  MEMFILE* json_file = memfopen();    // Writing JSON to this file.
-
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());         // GET URL
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memfwrite);     // Write function
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, json_file);         // JSON saved here
-    curl_easy_perform(curl);                                      // Perform the request
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);  // Get HTTP Code
-  }
-  curl_easy_cleanup(curl);    // Clean up cURL
+  http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
   if (http_code != HTTP_AUTHORIZED) {
     std::cerr << "\nError in: get_datasets_and_mediaobjects().\n";
     std::cerr << "GET project fields failed.\n";
     std::cerr << "Is the project ID you entered valid?\n";
-    memfclose(json_file);   // Close the memfile
-
     return false;
   }
 
-  std::string errors;
+  // Parse the JSON file, just like the main page of PicoJSON does.
+  std::string errors = parse(get_data, json_str);
 
-  // Parse the JSON file.
-  parse(get_data, json_file->data, json_file->data + json_file->size, &errors);
-  memfclose(json_file);   // close the memfile
-
-  if (errors.empty() != true) {   // If we have errors, print them out and quit.
+  if ( !errors.empty() ) {   // If we have errors, print them out and quit.
     std::cerr << "\nError in method: get_datasets_and_mediaobjects()\n";
     std::cerr << "Parsing JSON file failed. Error was: " << errors;
     return false;
@@ -398,8 +360,6 @@ std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
 
   return vector_data;     // This should be empty, or may not contain all the data.
 }
-
-
 
 bool iSENSE::post_json_key() {
   if(!empty_project_check(POST_KEY, "post_json_key()")) {
@@ -511,7 +471,8 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
 // JSON data. Do some magic on this file to get it into a C++ string.
 // Returns the HTTP code it gets, and stores data in a string.
 int iSENSE::get_data_funct(int get_type) {
-  curl = curl_easy_init();            // get curl handle
+  curl = curl_easy_init();  // get curl handle
+  json_str.clear();     // If the json string was used previously, erase it.
 
   if (curl) {
     // Normal GET parameters
@@ -541,6 +502,51 @@ int iSENSE::get_data_funct(int get_type) {
   return http_code;
 }
 
+// This function is called by all of the POST functions.
+int iSENSE::post_data_function(int post_type) {
+  // Upload_URL must have already been set. Otherwise the request will fail.
+  if (upload_URL == EMPTY || upload_URL.empty()) {
+    std::cerr << "\nError in method: post_data_function()\n";
+    std::cerr << "Please set a valid upload URL.\n";
+    return CURL_ERROR;
+  }
+
+  format_upload_string(post_type);        // format the upload string
+
+  CURL *curl = curl_easy_init();          // cURL object
+  long http_code = 0;                     // HTTP status code
+
+  struct curl_slist *headers = NULL;      // Headers for uploading via JSON
+  headers = curl_slist_append(headers, "Accept: application/json");
+  headers = curl_slist_append(headers, "Accept-Charset: utf-8");
+  headers = curl_slist_append(headers, "charsets: utf-8");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+
+  if (curl) {
+    // Get the upload JSON as a std::string
+    std::string upload_str = (value(upload_data).serialize());
+
+    // POST data
+    curl_easy_setopt(curl, CURLOPT_URL, upload_URL.c_str());        // URL
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, upload_str.c_str()); // JSON data
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);            // JSON Headers
+
+    // Disable output from curl.
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, suppress_output);
+
+    // Verbose debug output - turn this on if you are having problems uploading.
+    // std::cout << "\nrSENSE response: \n";
+    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+    curl_easy_perform(curl);// Perform the request, res will get the return code
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+    curl_easy_cleanup(curl);          // Clean up curl.
+
+    return http_code;                 // Return the HTTP code we get from curl.
+  }
+
+  return CURL_ERROR;                  // If curl fails, return CURL_ERROR (-1).
+}
 
 // Convert field name to field ID
 std::string iSENSE::get_field_ID(std::string field_name) {
@@ -549,7 +555,7 @@ std::string iSENSE::get_field_ID(std::string field_name) {
   // Check and see if the fields object is empty
   if (fields.is<picojson::null>() == true) {
     std::cerr << "\nError in method: get_field_ID()\n";
-    std::cerr << "Field array wasn't set up.";
+    std::cerr << "Field array wasn't set up.\n";
     std::cerr << "Have you pulled the fields off iSENSE?\n";
     return GET_ERROR;
   }
@@ -658,51 +664,6 @@ void iSENSE::format_data(std::vector<std::string> *vect,
   }
 
   fields_data[field_ID] = value(data); // Push the JSON array to the upload_data obj.
-}
-
-
-// This function is called by all of the POST functions.
-int iSENSE::post_data_function(int post_type) {
-  // Upload_URL must have already been set. Otherwise the request will fail.
-  if (upload_URL == EMPTY || upload_URL.empty()) {
-    std::cerr << "\nError in method: post_data_function()\n";
-    std::cerr << "Please set a valid upload URL.\n";
-    return CURL_ERROR;
-  }
-
-  format_upload_string(post_type);        // format the upload string
-
-  CURL *curl = curl_easy_init();          // cURL object
-  long http_code = 0;                     // HTTP status code
-
-  struct curl_slist *headers = NULL;      // Headers for uploading via JSON
-  headers = curl_slist_append(headers, "Accept: application/json");
-  headers = curl_slist_append(headers, "Accept-Charset: utf-8");
-  headers = curl_slist_append(headers, "charsets: utf-8");
-  headers = curl_slist_append(headers, "Content-Type: application/json");
-
-  if (curl) {
-    // Get the upload JSON as a std::string
-    std::string upload_str = (value(upload_data).serialize());
-
-    // POST data
-    curl_easy_setopt(curl, CURLOPT_URL, upload_URL.c_str());        // URL
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, upload_str.c_str()); // JSON data
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);            // JSON Headers
-
-    // Verbose debug output - turn this on if you are having problems uploading.
-    // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-
-    std::cout << "\nrSENSE response: \n";
-
-    curl_easy_perform(curl);// Perform the request, res will get the return code
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-    curl_easy_cleanup(curl);          // Clean up curl.
-
-    return http_code;                 // Return the HTTP code we get from curl.
-  }
-
-  return CURL_ERROR;                  // If curl fails, return CURL_ERROR (-1).
 }
 
 // Checks to see if the given project has been properly setup.
@@ -852,8 +813,6 @@ void iSENSE::debug() {
 // This is a better write function.
 // See this URL for details: http://www.cplusplus.com/forum/unices/45878/
 size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up) {
-    json_str.clear();   // json_str gets reused so always clear it first.
-
     // buf is a pointer to the data that curl has for us
     // size * nmemb is the size of the buffer
     for (int c = 0; (unsigned)c < size * nmemb; c++) {
@@ -863,51 +822,8 @@ size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up) {
     return size * nmemb;          // tell curl how many bytes we handled
 }
 
-// These are needed for picojson & libcURL.
-MEMFILE*  memfopen() {
-  MEMFILE* mf = (MEMFILE*) malloc(sizeof(MEMFILE));
-  mf->data = NULL;
-  mf->size = 0;
-  return mf;
-}
-
-void memfclose(MEMFILE* mf) {
-  if (mf == NULL) {                 // Double check to make sure that mf exists.
-    return;
-  }
-  if (mf != NULL && mf->data) {     // OK to free the char array
-    free(mf->data);
-  }
-  free(mf);                         // And OK to free the structure
-}
-
 // Simple function only used by the get_check_user function to
 // suppress curl's output to the screen.
 size_t suppress_output(char* ptr, size_t size, size_t nmemb, void* stream) {
   return size * nmemb;
-}
-
-size_t memfwrite(char* ptr, size_t size, size_t nmemb, void* stream) {
-  MEMFILE* mf = (MEMFILE*) stream;
-  int block = size * nmemb;
-
-  if (!mf->data) {
-    mf->data = (char*) malloc(block);
-  } else {
-    mf->data = (char*) realloc(mf->data, mf->size + block);
-  }
-  if (mf->data) {
-    memcpy(mf->data + mf->size, ptr, block);
-    mf->size += block;
-  }
-
-  return block;
-}
-
-char* memfstrdup(MEMFILE* mf) {
-  char* buf = (char*)malloc(mf->size + 1);
-  memcpy(buf, mf->data, mf->size);
-  buf[mf->size] = 0;
-
-  return buf;
 }
