@@ -1,5 +1,8 @@
 #include "include/API.h"
 
+// Global so we can reuse it for all GET requests.
+std::string json_str;   // JSON from GET requests
+
 iSENSE::iSENSE() {                  // Default constructor
   upload_URL = EMPTY;
   get_URL = EMPTY;
@@ -12,8 +15,7 @@ iSENSE::iSENSE() {                  // Default constructor
   email = EMPTY;
   password = EMPTY;
 
-  // This should be called ONCE, and it setups libcurl.
-  curl_global_init(CURL_GLOBAL_ALL);
+  curl_global_init(CURL_GLOBAL_ALL);            // Setup libcurl exactly once.
 }
 
 // Constructor with parameters
@@ -24,15 +26,12 @@ iSENSE::iSENSE(std::string proj_ID, std::string proj_title,
   set_project_label(label);
   set_contributor_key(contr_key);
 
-  // This should be called ONCE for the entire programs lifetime.
-  // This is simply to setup libcurl.
-  curl_global_init(CURL_GLOBAL_ALL);
+  curl_global_init(CURL_GLOBAL_ALL);            // Setup libcurl exactly once.
 }
 
 // Override the constructor, we need to make sure we cleanup libcurl.
 iSENSE::~iSENSE() {
-  // Make sure to cleanup libcurl exactly ONCE.
-  curl_global_cleanup();
+  curl_global_cleanup();          // Make sure to cleanup libcurl exactly ONCE.
 }
 
 // Similar to the constructor with parameters, but can be called at anytime
@@ -149,53 +148,31 @@ void iSENSE::push_vector(std::string field_name, std::vector<std::string> data) 
 
 // Searches for projects with the search term.
 std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
-  std::string get_search = devURL + "/projects?utf8=true&search=" \
-                         + search_term + "&sort=updated_at&order=DESC";
+  get_URL = devURL + "/projects?utf8=true&search=" + search_term + "&sort=updated_at&order=DESC";
   std::vector<std::string> project_titles;    // Vector of project titles.
 
-  curl = curl_easy_init();            // get curl handle
-  MEMFILE* json_file = memfopen();    // Writing JSON to this file.
+  http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, get_search.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, memfwrite);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, json_file);
-
-    // Perform the request, res will get the return code.
-    res = curl_easy_perform(curl);
-
-    // Get HTTP code for error checking.
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-  }
-
-  // Check for errors.
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-  }
-  if (http_code != HTTP_AUTHORIZED) {   // Didn't get HTTP code 200.
+  // Check for errors. We need to get a code 200 for this method.
+  if (http_code != HTTP_AUTHORIZED) {
     std::cerr << "\nError in: get_projects_search(string search_term) \n";
     std::cerr << "Project search failed.\n";
-    std::cerr << "Something with either curl, your internet connection, \n";
+    std::cerr << "Something with either curl, your Internet connection, \n";
     std::cerr << "iSENSE or something else failed.\n";
-    memfclose(json_file);
-
-    return project_titles;
+    return project_titles;                            // Return an empty vector
   }
 
-  std::string errors;
   value projects_json;
 
-  // Parse the JSON file.
-  parse(projects_json, json_file->data, json_file->data + json_file->size, &errors);
+  // Parse the JSON file, just like the main page of PicoJSON does.
+  std::string errors = parse(projects_json, json_str);
 
   // If we have errors, print them out and quit.
-  if (errors.empty() != true) {
+  if ( !errors.empty() ) {
     std::cerr << "\nError in: get_projects_search(string search_term)";
     std::cerr << "Error parsing JSON file.\n";
     std::cerr << "Error was: " << errors << "\n";
-    memfclose(json_file);
-
-    return project_titles;  // Return an empty vector
+    return project_titles;                            // Return an empty vector
   }
 
   // Convert the JSON array (projects_json) into a vector of project title strings
@@ -209,21 +186,16 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
   if (the_begin == the_end) {
     std::cerr << "\nError in: get_projects_search(string search_term) \n";
     std::cerr << "Project title array is empty.\n";
-    memfclose(json_file);
-
-    return project_titles;  // Return an empty vector
+    return project_titles;                            // Return an empty vector
   }
 
   for (it = projects_array.begin(); it != projects_array.end(); it++) {
-    object obj = it->get<object>();       // Get the current object
-    std::string name = obj["name"].get<std::string>();   // Grab the field name
-    project_titles.push_back(name);       // Push the name back into the vector.
+    object obj = it->get<object>();                       // Get the current obj
+    std::string name = obj["name"].get<std::string>();    // Grab the field name
+    project_titles.push_back(name);                       // Add to the vector.
   }
 
-  // Always cleanup
-  curl_easy_cleanup(curl);
-  memfclose(json_file);
-  return project_titles;     // Return a vector of project titles
+  return project_titles;                    // Return a vector of project titles
 }
 
 bool iSENSE::get_check_user() {
@@ -235,18 +207,9 @@ bool iSENSE::get_check_user() {
     return false;
   }
 
-  get_UserURL = devURL + "/users/myInfo?email=" + email + "&password=" + password;
+  get_URL = devURL + "/users/myInfo?email=" + email + "&password=" + password;
 
-  curl = curl_easy_init();            // get curl handle
-
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, get_UserURL.c_str());       // GET URL
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, suppress_output); // Suppress output to STDOUT
-    curl_easy_perform(curl);                                        // Perform the request
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);    // get HTTP code.
-  }
-
-  curl_easy_cleanup(curl);    // Always cleanup.
+  http_code = get_data_funct(GET_QUIET);         // quietly get data off iSENSE.
 
   if (http_code == HTTP_AUTHORIZED) {
     return true;
@@ -543,6 +506,41 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
 //******************************************************************************
 // Below this point are helper functions. Users should only call functions
 // above this point, as these are all called by the API functions.
+
+// GET data off of iSENSE using libcurl. Save the result in a MEMFILE called
+// JSON data. Do some magic on this file to get it into a C++ string.
+// Returns the HTTP code it gets, and stores data in a string.
+int iSENSE::get_data_funct(int get_type) {
+  curl = curl_easy_init();            // get curl handle
+
+  if (curl) {
+    // Normal GET parameters
+    curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
+
+    // For get_check_user() we stop libcurl from outputting to STDOUT.
+    if (get_type == GET_QUIET) {
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, suppress_output);
+    }
+
+    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
+
+    // Perform the request, res will get the return code.
+    res = curl_easy_perform(curl);
+
+    // Get HTTP code for error checking.
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  }
+
+  // Check for errors.
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed in get_data(): %s\n",
+            curl_easy_strerror(res));
+  }
+
+  return http_code;
+}
+
 
 // Convert field name to field ID
 std::string iSENSE::get_field_ID(std::string field_name) {
@@ -851,6 +849,20 @@ void iSENSE::debug() {
 
 
 //******************************************************************************
+// This is a better write function.
+// See this URL for details: http://www.cplusplus.com/forum/unices/45878/
+size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up) {
+    json_str.clear();   // json_str gets reused so always clear it first.
+
+    // buf is a pointer to the data that curl has for us
+    // size * nmemb is the size of the buffer
+    for (int c = 0; (unsigned)c < size * nmemb; c++) {
+        json_str.push_back(buf[c]);
+    }
+
+    return size * nmemb;          // tell curl how many bytes we handled
+}
+
 // These are needed for picojson & libcURL.
 MEMFILE*  memfopen() {
   MEMFILE* mf = (MEMFILE*) malloc(sizeof(MEMFILE));

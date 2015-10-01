@@ -27,6 +27,10 @@ const std::string live_baseURL = "http://isenseproject.org";
 const std::string devURL = "http://rsense-dev.cs.uml.edu/api/v1";
 const std::string liveURL = "http://isenseproject.org/api/v1";
 
+// GET related constants
+const int GET_NORMAL = 1;
+const int GET_QUIET = 2;
+
 // POST related constants
 const int POST_KEY = 1;
 const int APPEND_KEY = 2;
@@ -44,6 +48,9 @@ const int CURL_ERROR = -1;
 // Error checking constants
 const std::string GET_ERROR = "ERROR";
 const std::string EMPTY = "-----";
+
+// This is required for libcurl to save the JSON from iSENSE in a C++ string.
+size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up);
 
 /*
  *    This is from the picojson example page
@@ -164,6 +171,9 @@ public:
   // This formats one FIELD ID : DATA pair
   void format_data(std::vector<std::string> *vect, array::iterator it, std::string field_ID);
 
+  // This function makes a GET request via libcurl
+  int get_data_funct(int get_type);
+
   // This function makes a POST request via libcurl
   int post_data_function(int post_type);
 
@@ -217,10 +227,9 @@ private:
   // libcurl objects / variables. Users should ignore this.
   // Defined once as the libcurl tutorial says to do:
   // http://curl.haxx.se/libcurl/c/libcurl-tutorial.html
-  CURL *curl;           // curl handle
-  CURLcode res;         // curl response code
-  MEMFILE* json_file;   // JSON file in memory.
-  long http_code;       // HTTP status code
+  CURL *curl;             // curl handle
+  CURLcode res;           // curl response code
+  long http_code;         // HTTP status code
 };
 
 #endif
