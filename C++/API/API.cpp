@@ -1,8 +1,5 @@
 #include "include/API.h"
 
-// Global so we can reuse it for all GET requests.
-std::string json_str;   // JSON from GET requests
-
 iSENSE::iSENSE() {                  // Default constructor
   upload_URL = EMPTY;
   get_URL = EMPTY;
@@ -154,7 +151,7 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
   http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
   // Check for errors. We need to get a code 200 for this method.
-  if( !check_http_code(http_code, "get_projects_search") ) {
+  if( !check_http_code(http_code, "get_projects_search()") ) {
     return project_titles;                            // Return an empty vector
   }
 
@@ -223,8 +220,8 @@ bool iSENSE::get_project_fields() {
   http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
   // Check for errors. We need to get a code 200 for this method.
-  if( !check_http_code(http_code, "get_projects_fields") ) {
-    return project_titles;                            // Return an empty vector
+  if( !check_http_code(http_code, "get_projects_fields()") ) {
+    return false;                            // Return an empty vector
   }
 
   // Parse the JSON file, just like the main page of PicoJSON does.
@@ -255,11 +252,9 @@ bool iSENSE::get_datasets_and_mediaobjects() {
   get_URL = devURL + "/projects/" + project_ID + "?recur=true";
   http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
-  if (http_code != HTTP_AUTHORIZED) {
-    std::cerr << "\nError in: get_datasets_and_mediaobjects().\n";
-    std::cerr << "GET project fields failed.\n";
-    std::cerr << "Is the project ID you entered valid?\n";
-    return false;
+  // Check for errors. We need to get a code 200 for this method.
+  if( !check_http_code(http_code, "get_datasets_and_mediaobjects()") ) {
+    return false;                            // Return an empty vector
   }
 
   // Parse the JSON file, just like the main page of PicoJSON does.
@@ -472,16 +467,17 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
 // Returns the HTTP code it gets, and stores data in a string.
 int iSENSE::get_data_funct(int get_type) {
   curl = curl_easy_init();  // get curl handle
-  json_str.clear();     // If the json string was used previously, erase it.
+  json_str.clear();         // If the json string was used previously, erase it.
 
   if (curl) {
     // Normal GET parameters
     curl_easy_setopt(curl, CURLOPT_URL, get_URL.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &iSENSE::writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &json_str);
 
     // For get_check_user() we stop libcurl from outputting to STDOUT.
     if (get_type == GET_QUIET) {
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, suppress_output);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &suppress_output);
     }
 
     //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
@@ -532,7 +528,7 @@ int iSENSE::post_data_function(int post_type) {
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);            // JSON Headers
 
     // Disable output from curl.
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, suppress_output);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &suppress_output);
 
     // Verbose debug output - turn this on if you are having problems uploading.
     // std::cout << "\nrSENSE response: \n";
@@ -812,18 +808,18 @@ void iSENSE::debug() {
 //******************************************************************************
 // This is a better write function.
 // See this URL for details: http://www.cplusplus.com/forum/unices/45878/
-size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up) {
-    // buf is a pointer to the data that curl has for us
-    // size * nmemb is the size of the buffer
-    for (int c = 0; (unsigned)c < size * nmemb; c++) {
-        json_str.push_back(buf[c]);
-    }
+int iSENSE::writeCallback(char* data, size_t size, size_t nmemb, std::string *buffer) {
+  int result = 0;
+  if(buffer != NULL) {
+    buffer->append(data, size * nmemb);
+    result = size * nmemb;
+  }
 
-    return size * nmemb;          // tell curl how many bytes we handled
+  return result;          // tell curl how many bytes we handled
 }
 
 // Simple function only used by the get_check_user function to
 // suppress curl's output to the screen.
-size_t suppress_output(char* ptr, size_t size, size_t nmemb, void* stream) {
+int iSENSE::suppress_output(char* ptr, size_t size, size_t nmemb, void* stream) {
   return size * nmemb;
 }

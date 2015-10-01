@@ -31,7 +31,6 @@ using namespace picojson;
  *
  */
 
-
 // Constants for running C++ Tests
 const std::string test_project_ID = "1406";
 const std::string test_project_name = "C++ Testing ";

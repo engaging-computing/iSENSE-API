@@ -49,26 +49,6 @@ const int CURL_ERROR = -1;
 const std::string GET_ERROR = "ERROR";
 const std::string EMPTY = "-----";
 
-// This is required for libcurl to save the JSON from iSENSE in a C++ string.
-size_t writeCallback(char* buf, size_t size, size_t nmemb, void* up);
-
-/*
- *    This is from the picojson example page
- *    I use it to save the JSON from iSENSE to memory (temporary)
- *    See the following URL for an example:
- *    https://github.com/kazuho/picojson/blob/master/examples/github-issues.cc
- */
-typedef struct {
-  char* data;         // response data from server
-  size_t size;          // response size of data
-} MEMFILE;
-
-MEMFILE*  memfopen();
-void memfclose(MEMFILE* mf);
-size_t suppress_output(char* ptr, size_t size, size_t nmemb, void* stream);
-size_t memfwrite(char* ptr, size_t size, size_t nmemb, void* stream);
-char* memfstrdup(MEMFILE* mf);
-
 class iSENSE {
 public:
   // Constructors
@@ -158,6 +138,7 @@ public:
   // an error occurs in one of them. Users should instead use the API functions
   // listed above.
 
+  // Dataset / field ID functions. Given a name, converts to ID
   std::string get_dataset_ID(std::string dataset_name);
   std::string get_field_ID(std::string field_name);
 
@@ -176,6 +157,13 @@ public:
 
   // This function makes a POST request via libcurl
   int post_data_function(int post_type);
+
+  // libcurl function for getting data. See:
+  // http://www.velvetcache.org/2008/10/24/better-libcurl-from-c
+  static int writeCallback(char* data, size_t size, size_t nmemb, std::string *buffer);
+
+  // This is used to stop libcurl from outputting to the screen.
+  static int suppress_output(char* ptr, size_t size, size_t nmemb, void* stream);
 
 protected:
 
@@ -227,9 +215,10 @@ private:
   // libcurl objects / variables. Users should ignore this.
   // Defined once as the libcurl tutorial says to do:
   // http://curl.haxx.se/libcurl/c/libcurl-tutorial.html
-  CURL *curl;             // curl handle
-  CURLcode res;           // curl response code
-  long http_code;         // HTTP status code
+  CURL *curl;                     // curl handle
+  CURLcode res;                   // curl response code
+  long http_code;                 // HTTP status code
+  std::string json_str;           // JSON from GET requests
 };
 
 #endif
