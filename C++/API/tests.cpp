@@ -116,16 +116,17 @@ BOOST_AUTO_TEST_CASE(get_projects_search) {
 
   std::vector<std::string> project_titles;
   project_titles = test_true.get_projects_search(test_search_true);
-  //test_true.debug();
 
-  BOOST_REQUIRE(project_titles.empty() == false);             // This should not be empty.
+  // This should not be empty.
+  BOOST_REQUIRE(project_titles.empty() == false);
 
   iSENSE test_false;
 
   project_titles.clear();
   project_titles = test_false.get_projects_search(test_search_empty);
 
-  BOOST_REQUIRE(project_titles.empty() == true);              // This should be empty, since its a blank search term.
+  // This should be empty, since its a blank search term.
+  BOOST_REQUIRE(project_titles.empty() == true);
 }
 
 
@@ -271,7 +272,7 @@ BOOST_AUTO_TEST_CASE(append_withDatasetName_byEmail) {
 // (Contributor keys)
 BOOST_AUTO_TEST_CASE(append_withDatasetID_byKey) {
   Test test;
-  std::string test_dataset_name_key = "C++ Dataset Append Test Key";
+  std::string test_dataset_name_key = "key test";
 
   // Add project info / dataset info to the object
   test.set_project_ID(test_project_ID);
@@ -293,20 +294,18 @@ BOOST_AUTO_TEST_CASE(append_withDatasetID_byKey) {
 // (Contributor keys)
 BOOST_AUTO_TEST_CASE(append_withDatasetName_byKey) {
   iSENSE test;
-  std::string test_dataset_name_key = "C++ Dataset Append Test Key";
+  std::string test_dataset_name_key = "key test";
 
   // Add project info / dataset info to the object
   test.set_project_ID(test_project_ID);
   test.set_project_title(test_project_name);
-  test.set_project_label(test_project_label);
+  test.set_project_label(test_project_key);
   test.set_contributor_key(test_project_key);
 
   // Push data back to the object.
   test.push_back("Number", "123456789");
   test.push_back("Text", "Dataset Name Test -- Key");
   test.push_back("Timestamp", test.generate_timestamp());
-
-  test.append_key_byName(test_dataset_name_key);
 
   BOOST_REQUIRE(test.append_key_byName(test_dataset_name_key) == true);
 }

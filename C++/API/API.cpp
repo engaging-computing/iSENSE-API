@@ -1,6 +1,6 @@
 #include "include/API.h"
 
-iSENSE::iSENSE() {                  // Default constructor
+iSENSE::iSENSE() {                            // Default constructor
   upload_URL = EMPTY;
   get_URL = EMPTY;
   get_UserURL = EMPTY;
@@ -11,7 +11,6 @@ iSENSE::iSENSE() {                  // Default constructor
   contributor_label = "label";
   email = EMPTY;
   password = EMPTY;
-
   curl_global_init(CURL_GLOBAL_ALL);            // Setup libcurl exactly once.
 }
 
@@ -22,7 +21,6 @@ iSENSE::iSENSE(std::string proj_ID, std::string proj_title,
   set_project_title(proj_title);
   set_project_label(label);
   set_contributor_key(contr_key);
-
   curl_global_init(CURL_GLOBAL_ALL);            // Setup libcurl exactly once.
 }
 
@@ -607,7 +605,6 @@ void iSENSE::format_upload_string(int post_type) {
 
     case APPEND_KEY:
       upload_data["contribution_key"] = value(contributor_key);
-      upload_data["contributor_name"] = value(contributor_label);
       upload_data["id"] = value(dataset_ID);
       break;
 
