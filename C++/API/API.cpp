@@ -1,6 +1,6 @@
 #include "include/API.h"
 
-iSENSE::iSENSE() {                            // Default constructor
+iSENSE::iSENSE() {                              // Default constructor
   upload_URL = EMPTY;
   get_URL = EMPTY;
   get_UserURL = EMPTY;
@@ -72,14 +72,13 @@ bool iSENSE::set_email_password(std::string proj_email,
   email = proj_email;
   password = proj_password;
 
-  if (!get_check_user()) {
+  if ( !get_check_user() ) {
     std::cerr << "\nError in: set_email_password()\n";
     std::cerr << "Your email and password are **not** valid.\n";
     std::cerr << "You also need to have created an account on iSENSE.\n";
     std::cerr << "See: http://rsense-dev.cs.uml.edu/users/new \n\n";
     return false;
   }
-
   return true;
 }
 
@@ -111,7 +110,6 @@ void iSENSE::clear_data(void) {     // Resets the object and clears the map.
   map_data.clear();   // Clear the map_data
 
   // Clear the picojson objects
-
   // Under the hood picojson::objects are STL maps and picojson::arrays are STL vectors.
   upload_data.clear();
   fields_data.clear();
@@ -144,15 +142,13 @@ void iSENSE::push_vector(std::string field_name, std::vector<std::string> data) 
 // Searches for projects with the search term.
 std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
   get_URL = devURL + "/projects?&search=" + search_term;
-  std::vector<std::string> project_titles;    // Vector of project titles.
-
+  std::vector<std::string> project_titles;          // Vector of project titles.
   http_code = get_data_funct(GET_NORMAL);           // get data off iSENSE.
 
   // Check for errors. We need to get a code 200 for this method.
   if( !check_http_code(http_code, "get_projects_search()") ) {
     return project_titles;                            // Return an empty vector
   }
-
   value projects_json;
 
   // Parse the JSON file, just like the main page of PicoJSON does.
@@ -165,11 +161,9 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
     std::cerr << "Error was: " << errors << "\n";
     return project_titles;                            // Return an empty vector
   }
-
   // Convert the JSON array (projects_json) into a vector of project title strings
   array projects_array = projects_json.get<array>();
   array::iterator it, the_begin, the_end;
-
   the_begin = projects_array.begin();
   the_end = projects_array.end();
 
@@ -185,7 +179,6 @@ std::vector<std::string> iSENSE::get_projects_search(std::string search_term) {
     std::string name = obj["name"].get<std::string>();    // Grab the field name
     project_titles.push_back(name);                       // Add to the vector.
   }
-
   return project_titles;                    // Return a vector of project titles
 }
 
@@ -204,7 +197,6 @@ bool iSENSE::get_check_user() {
   if (http_code == HTTP_AUTHORIZED) {
     return true;
   }
-
   return false;
 }
 
@@ -263,7 +255,6 @@ bool iSENSE::get_datasets_and_mediaobjects() {
     std::cerr << "Parsing JSON file failed. Error was: " << errors;
     return false;
   }
-
   fields = get_data.get("fields");        // Save the fields to the field array
   fields_array = fields.get<array>();
 
@@ -315,7 +306,6 @@ std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
     std::cerr << "\n\nUnable to return a vector of data.\n";
     std::cerr << "Either the dataset / field names are incorrect, \n";
     std::cerr << "Or the project ID is wrong.\n";
-
     return vector_data;   // this is an empty vector
   }
 
@@ -345,7 +335,6 @@ std::vector<std::string> iSENSE::get_dataset(std::string dataset_name,
       }
     }
   }
-
   std::cerr << "\n\nError in method: get_dataset(string, string)\n";
   std::cerr << "Failed to get dataset. \n";
   std::cerr << "Check the following & make sure they are correct:\n";
@@ -365,7 +354,6 @@ bool iSENSE::post_json_key() {
   if(!check_http_code(http_code, "post_json_key()")) {
     return false;
   }
-
   return true;
 }
 
@@ -380,7 +368,6 @@ bool iSENSE::post_json_email() {
   if(!check_http_code(http_code, "post_json_email()")) {
     return false;
   }
-
   return true;
 }
 
@@ -397,7 +384,6 @@ bool iSENSE::append_key_byID(std::string dataset_ID) {
   if(!check_http_code(http_code, "append_key_byID")) {
     return false;
   }
-
   return true;
 }
 
@@ -413,7 +399,6 @@ bool iSENSE::append_key_byName(std::string dataset_name) {
   if (dataset_ID != GET_ERROR) {
     return append_key_byID(dataset_ID);     // Call append byID function.
   }
-
   // If we got here, we failed to find that dataset name in the current project.
   std::cerr << "\nError in method: append_key_byName()\n";
   std::cerr << "Failed to find the dataset name in project # " << project_ID;
@@ -433,7 +418,6 @@ bool iSENSE::append_email_byID(std::string dataset_ID) {
   if(!check_http_code(http_code, "append_email_byID()")) {
     return false;
   }
-
   return true;
 }
 
@@ -449,7 +433,6 @@ bool iSENSE::append_email_byName(std::string dataset_name) {
   if (dataset_ID != GET_ERROR) {
     return append_email_byID(dataset_ID);   // Call append byID function.
   }
-
   // If we got here, we failed to find that dataset name in the current project.
   std::cerr << "\nError in method: append_email_byName()\n";
   std::cerr << "Failed to find the dataset name in project # " << project_ID;
@@ -477,9 +460,6 @@ int iSENSE::get_data_funct(int get_type) {
     if (get_type == GET_QUIET) {
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &suppress_output);
     }
-
-    //curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //tell curl to output its progress
-
     // Perform the request, res will get the return code.
     res = curl_easy_perform(curl);
 
@@ -492,7 +472,6 @@ int iSENSE::get_data_funct(int get_type) {
     fprintf(stderr, "curl_easy_perform() failed in get_data(): %s\n",
             curl_easy_strerror(res));
   }
-
   return http_code;
 }
 
@@ -506,9 +485,7 @@ int iSENSE::post_data_function(int post_type) {
   }
 
   format_upload_string(post_type);        // format the upload string
-
-  CURL *curl = curl_easy_init();          // cURL object
-  long http_code = 0;                     // HTTP status code
+  curl = curl_easy_init();                // cURL object
 
   struct curl_slist *headers = NULL;      // Headers for uploading via JSON
   headers = curl_slist_append(headers, "Accept: application/json");
@@ -535,10 +512,8 @@ int iSENSE::post_data_function(int post_type) {
     curl_easy_perform(curl);// Perform the request, res will get the return code
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
     curl_easy_cleanup(curl);          // Clean up curl.
-
     return http_code;                 // Return the HTTP code we get from curl.
   }
-
   return CURL_ERROR;                  // If curl fails, return CURL_ERROR (-1).
 }
 
@@ -560,11 +535,10 @@ std::string iSENSE::get_field_ID(std::string field_name) {
     std::string field_ID = obj["id"].to_str();         // Grab the field ID
     std::string name = obj["name"].get<std::string>(); // Grab the field name
 
-    if (name == field_name) {   // Found the given field name
-      return field_ID;          // So return the field ID
+    if (name == field_name) {                   // Found the given field name
+      return field_ID;                          // So return the field ID
     }
   }
-
   std::cerr << "\nError in method: get_field_ID()\n";
   std::cerr << "Unable to find the field ID for the given field name.\n";
   return GET_ERROR;
@@ -575,7 +549,7 @@ std::string iSENSE::get_dataset_ID(std::string dataset_name) {
   array::iterator it;
 
   // Check and see if the datasets object is empty
-  // Need to find out how to do this using picojson arrays!
+  // Need to find out how to do this using picojson arrays
 
   // This is similar to the get_field_ID function loop.
   for (it = data_sets.begin(); it != data_sets.end(); it++) {
@@ -587,7 +561,6 @@ std::string iSENSE::get_dataset_ID(std::string dataset_name) {
       return dataset_ID;          // So return the dataset ID
     }
   }
-
   std::cerr << "\nError in method: get_dataset_ID()\n";
   std::cerr << "Unable to find the dataset ID for the given dataset name.\n";
   return GET_ERROR;
@@ -595,7 +568,7 @@ std::string iSENSE::get_dataset_ID(std::string dataset_name) {
 
 // Format JSON Upload strings.
 void iSENSE::format_upload_string(int post_type) {
-  upload_data["title"] = value(title);          // Add the title
+  upload_data["title"] = value(title);
 
   switch (post_type) {
     case POST_KEY:
@@ -641,9 +614,7 @@ void iSENSE::format_upload_string(int post_type) {
     vect = &map_data[name];
     format_data(vect, it, field_ID);
   }
-
-  // Add the field_data obj to the upload_data obj
-  upload_data["data"] = value(fields_data);
+  upload_data["data"] = value(fields_data);  // Add field_data obj to upload_data obj
 }
 
 // This makes format_upload_string() much shorter.
@@ -655,7 +626,6 @@ void iSENSE::format_data(std::vector<std::string> *vect,
   for (x = vect -> begin(); x < vect -> end(); x++) {
     data.push_back(value(*x));    // Push all the vector data into a JSON array.
   }
-
   fields_data[field_ID] = value(data); // Push the JSON array to the upload_data obj.
 }
 
@@ -675,7 +645,6 @@ bool iSENSE::empty_project_check(int type, std::string method) {
       return false;
     }
   }
-
   // Check key based values, such as contributor key and label.
   if (type == POST_KEY || type == APPEND_KEY) {
     if (contributor_key == EMPTY || contributor_key.empty()) {
@@ -688,7 +657,6 @@ bool iSENSE::empty_project_check(int type, std::string method) {
       contributor_label = "cURL";
     }
   }
-
   // The rest are general checks that should not be empty, since the calling
   // method depends on them being set properly.
   if (project_ID == EMPTY || project_ID.empty()) {
@@ -707,7 +675,6 @@ bool iSENSE::empty_project_check(int type, std::string method) {
     std::cerr << "You should push some data back to this object.\n";
     return false;
   }
-
   return true;
 }
 
@@ -811,7 +778,6 @@ int iSENSE::writeCallback(char* data, size_t size, size_t nmemb, std::string *bu
     buffer->append(data, size * nmemb);
     result = size * nmemb;
   }
-
   return result;          // tell curl how many bytes we handled
 }
 

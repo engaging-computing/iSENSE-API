@@ -44,7 +44,6 @@ const std::string test_project_label = "Boost";
 const std::string test_search_true = "test";
 const std::string test_search_empty = "abcdefghig";
 
-
 /*
  * This is a derived class to quickly test the append_byID functions.
  * It is derived from iSENSE, and by doing this I can create a public function
@@ -66,7 +65,6 @@ class Test: public iSENSE {
   }
 };
 
-
 // Test the Check User method.
 BOOST_AUTO_TEST_CASE(get_check_user) {
   iSENSE test;
@@ -79,7 +77,6 @@ BOOST_AUTO_TEST_CASE(get_check_user) {
   BOOST_REQUIRE(test.set_email_password(test_email, test_password) == true);
 }
 
-
 // Test the GET project fields method.
 BOOST_AUTO_TEST_CASE(get_project_fields) {
 
@@ -91,7 +88,6 @@ BOOST_AUTO_TEST_CASE(get_project_fields) {
   iSENSE test_false;
   BOOST_REQUIRE(test_false.get_project_fields() == false);
 }
-
 
 // Test the get_datasets / media objects method
 BOOST_AUTO_TEST_CASE(get_datasets_and_mediaobjects) {
@@ -108,7 +104,6 @@ BOOST_AUTO_TEST_CASE(get_datasets_and_mediaobjects) {
   // This should fail.
   BOOST_REQUIRE(test_false.get_datasets_and_mediaobjects() == false);
 }
-
 
 // Test the search project method
 BOOST_AUTO_TEST_CASE(get_projects_search) {
@@ -129,7 +124,6 @@ BOOST_AUTO_TEST_CASE(get_projects_search) {
   BOOST_REQUIRE(project_titles.empty() == true);
 }
 
-
 // Test the get dataset method
 BOOST_AUTO_TEST_CASE(get_dataset) {
   iSENSE test_true("106", "test", "BOOST Test", "123");
@@ -146,7 +140,6 @@ BOOST_AUTO_TEST_CASE(get_dataset) {
 
   BOOST_REQUIRE(baseball_hits.empty() == true);
 }
-
 
 // Test the get_dataset_ID method
 BOOST_AUTO_TEST_CASE(get_dataset_ID) {
@@ -169,7 +162,6 @@ BOOST_AUTO_TEST_CASE(get_dataset_ID) {
   BOOST_REQUIRE(datasetID == GET_ERROR);
 }
 
-
 // Test the get_field_ID method
 BOOST_AUTO_TEST_CASE(get_field_ID) {
   iSENSE test_true("106", "test", "BOOST Test", "123");
@@ -191,7 +183,6 @@ BOOST_AUTO_TEST_CASE(get_field_ID) {
   BOOST_REQUIRE(fieldID == GET_ERROR);
 }
 
-
 // Test POST with Contributor keys
 BOOST_AUTO_TEST_CASE(post_JSON_withKey) {
   std::string project_title = "POST Test with Key ";
@@ -207,7 +198,6 @@ BOOST_AUTO_TEST_CASE(post_JSON_withKey) {
 
   BOOST_REQUIRE(test.post_json_key() == true);
 }
-
 
 // Test POST with Email/Password
 BOOST_AUTO_TEST_CASE(post_JSON_withEmail) {
@@ -226,7 +216,6 @@ BOOST_AUTO_TEST_CASE(post_JSON_withEmail) {
 
   BOOST_REQUIRE(test.post_json_email() == true);
 }
-
 
 // Test Appending with Dataset IDs
 // (Email / Password)
@@ -247,7 +236,6 @@ BOOST_AUTO_TEST_CASE(append_withDatasetID_byEmail) {
   BOOST_REQUIRE(test.check_append_email_byID(test_dataset_ID_email) == true);
 }
 
-
 // Test Appending with Dataset names
 // (Email / Password)
 BOOST_AUTO_TEST_CASE(append_withDatasetName_byEmail) {
@@ -266,7 +254,6 @@ BOOST_AUTO_TEST_CASE(append_withDatasetName_byEmail) {
 
   BOOST_REQUIRE(test.append_email_byName(test_dataset_name_email) == true);
 }
-
 
 // Test Appending with Dataset IDs
 // (Contributor keys)
@@ -288,7 +275,6 @@ BOOST_AUTO_TEST_CASE(append_withDatasetID_byKey) {
 
   BOOST_REQUIRE(test.check_append_key_byID(test_dataset_ID_key) == true);
 }
-
 
 // Test Appending with Dataset names
 // (Contributor keys)
