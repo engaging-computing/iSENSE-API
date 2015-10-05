@@ -20,14 +20,13 @@
 // For picojson
 using namespace picojson;
 
-// Currently only rSENSE is supported. In the future, allow switching between
-// dev and live.
+// Currently only rSENSE is supported. In the future, allow switching between dev and live.
 const std::string dev_baseURL = "http://rsense-dev.cs.uml.edu";
 const std::string devURL = "http://rsense-dev.cs.uml.edu/api/v1";
 const std::string local_baseURL = "http://localhost:3000";
 const std::string localURL = "http://localhost:3000/api/v1";
-const std::string live_baseURL = "http://isenseproject.org";
-const std::string liveURL = "http://isenseproject.org/api/v1";
+const std::string live_baseURL = "https://isenseproject.org";
+const std::string liveURL = "https://isenseproject.org/api/v1";
 
 // GET related constants
 const int GET_NORMAL = 1;
