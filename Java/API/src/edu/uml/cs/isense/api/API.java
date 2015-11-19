@@ -204,7 +204,6 @@ public class API {
 				proj.project_id = inner.getInt("id");
 				proj.name = inner.getString("name");
 				proj.url = inner.getString("url");
-				proj.hidden = inner.getBoolean("hidden");
 				proj.featured = inner.getBoolean("featured");
 				proj.like_count = inner.getInt("likeCount");
 				proj.timecreated = inner.getString("createdAt");
@@ -236,7 +235,6 @@ public class API {
 			proj.project_id = j.getInt("id");
 			proj.name = j.getString("name");
 			proj.url = j.getString("url");
-			proj.hidden = j.getBoolean("hidden");
 			proj.featured = j.getBoolean("featured");
 			proj.like_count = j.getInt("likeCount");
 			proj.timecreated = j.getString("createdAt");
@@ -437,7 +435,6 @@ public class API {
 				JSONObject inner = dataSets.getJSONObject(i);
 				rds.ds_id = inner.getInt("id");
 				rds.name = inner.getString("name");
-				rds.hidden = inner.getBoolean("hidden");
 				rds.url = inner.getString("url");
 				rds.timecreated = inner.getString("createdAt");
 				rds.fieldCount = inner.getInt("fieldCount");
@@ -449,6 +446,76 @@ public class API {
 		}
 		return result;
 	}
+
+ 	/**
+	 * Gets all the data sets associated with a project The data sets returned
+	 * by this function DO have their data field filled.
+	 *
+	 * @param projectId
+	 *            The project ID whose data sets you want
+	 * @return An ArrayList of Data Set objects
+	 */
+	public ArrayList<RDataSet> getFilledDataSets(int projectId) {
+		ArrayList<RDataSet> result = new ArrayList<RDataSet>();
+		try {
+			String reqResult = makeRequest(baseURL, "projects/" + projectId,
+					"recur=true", "GET", null);
+			JSONObject j = new JSONObject(reqResult);
+			JSONArray dataSets = j.getJSONArray("dataSets");
+			for (int i = 0; i < dataSets.length(); i++) {
+				RDataSet rds = new RDataSet();
+				JSONObject inner = dataSets.getJSONObject(i);
+				rds.ds_id = inner.getInt("id");
+				rds.name = inner.getString("name");
+				rds.url = inner.getString("url");
+				rds.timecreated = inner.getString("createdAt");
+				rds.fieldCount = inner.getInt("fieldCount");
+				rds.datapointCount = inner.getInt("datapointCount");
+				JSONObject jo = new JSONObject(); 
+        jo.put("data", inner.getJSONArray("data")); 
+        rds.data = rowsToCols(jo); 
+        rds.project_id = projectId; 
+        result.add(rds);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+  /** 
+   *
+   * Gets all datasets associated with a project by field.
+   * @param projectId   The project ID whose datasets you're looking for
+   * @param field       The field we care about
+   *
+   * @return An ArrayList of Strings containing the appropriate data
+   */
+  public ArrayList<String> getDataSetsByField(int ProjectID, String field) {
+    String FieldID = null; 
+    ArrayList<RDataSet> rdata = getFilledDataSets(ProjectID);
+    ArrayList<RProjectField> projectFields = getProjectFields(ProjectID);
+    ArrayList<String> fdata = new ArrayList<String>();
+    for (RProjectField f : projectFields) {
+      if (f.name.equals(field)) {
+        FieldID = f.field_id + "";
+        break;
+      }
+    }
+    for (RDataSet r : rdata) {
+      try {
+        System.out.println("iSENSE: fdata:" + r.data.getString(FieldID));
+        JSONArray jadata = new JSONArray();
+        jadata = r.data.getJSONArray(FieldID);
+        for (int i = 0; i < jadata.length(); i++) {
+          fdata.add(jadata.getString(i)); 
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    return fdata;
+  }
 
 	/**
 	 * Upload a dataset to iSENSE while logged in
