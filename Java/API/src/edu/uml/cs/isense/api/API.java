@@ -25,6 +25,11 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+// imports for the uploadMedia hotfix 
+// import org.apache.http.entity.mime.MultipartEntityBuilder;
+// import org.apache.http.HttpEntity; 
+// import org.apache.http.entity.ContentType; 
+
 import edu.uml.cs.isense.objects.RDataSet;
 import edu.uml.cs.isense.objects.RPerson;
 import edu.uml.cs.isense.objects.RProject;
@@ -49,7 +54,7 @@ public class API {
 
 	private String baseURL = "";
 	private final String publicURL = "https://isenseproject.org/api/v1";
-	private final String devURL = "https://rsense-dev.cs.uml.edu/api/v1";
+	private final String devURL = "http://dev.isenseproject.org/api/v1";
 
 	String authToken = "";
 	RPerson currentUser;
@@ -204,7 +209,6 @@ public class API {
 				proj.project_id = inner.getInt("id");
 				proj.name = inner.getString("name");
 				proj.url = inner.getString("url");
-				proj.hidden = inner.getBoolean("hidden");
 				proj.featured = inner.getBoolean("featured");
 				proj.like_count = inner.getInt("likeCount");
 				proj.timecreated = inner.getString("createdAt");
@@ -236,7 +240,6 @@ public class API {
 			proj.project_id = j.getInt("id");
 			proj.name = j.getString("name");
 			proj.url = j.getString("url");
-			proj.hidden = j.getBoolean("hidden");
 			proj.featured = j.getBoolean("featured");
 			proj.like_count = j.getInt("likeCount");
 			proj.timecreated = j.getString("createdAt");
@@ -437,7 +440,6 @@ public class API {
 				JSONObject inner = dataSets.getJSONObject(i);
 				rds.ds_id = inner.getInt("id");
 				rds.name = inner.getString("name");
-				rds.hidden = inner.getBoolean("hidden");
 				rds.url = inner.getString("url");
 				rds.timecreated = inner.getString("createdAt");
 				rds.fieldCount = inner.getInt("fieldCount");
@@ -449,6 +451,138 @@ public class API {
 		}
 		return result;
 	}
+
+	/**
+	 * Gets all the data set ids associated with a project 
+	 *
+	 * @param projectId
+	 *            The project ID whose data sets you want
+	 * @return An ArrayList of Data Set IDs
+	 */
+	public ArrayList<Integer> getDataSetIDs(int projectId) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		try {
+			String reqResult = makeRequest(baseURL, "projects/" + projectId,
+					"recur=true", "GET", null);
+			JSONObject j = new JSONObject(reqResult);
+			JSONArray dataSets = j.getJSONArray("dataSets");
+			for (int i = 0; i < dataSets.length(); i++) {
+				JSONObject inner = dataSets.getJSONObject(i);
+				result.add(inner.getInt("id"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	/** 
+	 * Gets all the data associated with a certain data set by field. 
+	 * 
+	 * @param projectId     The project we care about
+	 * @param dataSetId		The data set we care about
+	 * @param field         The field we care about
+	 * 
+	 * @return An ArrayList of strings containing the appropriate data 
+	 */
+	public ArrayList<String> getFieldFromDataSet (int ProjectID, String field, 
+		int dataSetId) {
+		String FieldID = null; 
+    	ArrayList<RDataSet> rdata = getFilledDataSets(ProjectID);
+    	ArrayList<RProjectField> projectFields = getProjectFields(ProjectID);
+    	ArrayList<String> fdata = new ArrayList<String>();
+   		for (RProjectField f : projectFields) {
+      		if (f.name.equals(field)) {
+        		FieldID = f.field_id + "";
+        		break;
+      		}
+   		}
+    	for (RDataSet r : rdata) {
+      		try {
+				if (r.ds_id == dataSetId) {
+        			System.out.println("iSENSE: fdata:" + r.data.getString(FieldID));
+        			JSONArray jadata = new JSONArray();
+        			jadata = r.data.getJSONArray(FieldID);
+        			for (int i = 0; i < jadata.length(); i++) {
+         	 			fdata.add(jadata.getString(i)); 
+        			}	
+				}
+      		} catch (Exception e) {
+        		e.printStackTrace();
+      		}
+    	}
+    	return fdata;
+  	}
+
+ 	/**
+	 * Gets all the data sets associated with a project The data sets returned
+	 * by this function DO have their data field filled.
+	 *
+	 * @param projectId
+	 *            The project ID whose data sets you want
+	 * @return An ArrayList of Data Set objects
+	 */
+	public ArrayList<RDataSet> getFilledDataSets(int projectId) {
+		ArrayList<RDataSet> result = new ArrayList<RDataSet>();
+		try {
+			String reqResult = makeRequest(baseURL, "projects/" + projectId,
+					"recur=true", "GET", null);
+			JSONObject j = new JSONObject(reqResult);
+			JSONArray dataSets = j.getJSONArray("dataSets");
+			for (int i = 0; i < dataSets.length(); i++) {
+				RDataSet rds = new RDataSet();
+				JSONObject inner = dataSets.getJSONObject(i);
+				rds.ds_id = inner.getInt("id");
+				rds.name = inner.getString("name");
+				rds.url = inner.getString("url");
+				rds.timecreated = inner.getString("createdAt");
+				rds.fieldCount = inner.getInt("fieldCount");
+				rds.datapointCount = inner.getInt("datapointCount");
+				JSONObject jo = new JSONObject(); 
+        jo.put("data", inner.getJSONArray("data")); 
+        rds.data = rowsToCols(jo); 
+        rds.project_id = projectId; 
+        result.add(rds);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+  /** 
+   *
+   * Gets all datasets associated with a project by field.
+   * @param projectId   The project ID whose datasets you're looking for
+   * @param field       The field we care about
+   *
+   * @return An ArrayList of Strings containing the appropriate data
+   */
+  public ArrayList<String> getDataSetsByField(int ProjectID, String field) {
+    String FieldID = null; 
+    ArrayList<RDataSet> rdata = getFilledDataSets(ProjectID);
+    ArrayList<RProjectField> projectFields = getProjectFields(ProjectID);
+    ArrayList<String> fdata = new ArrayList<String>();
+    for (RProjectField f : projectFields) {
+      if (f.name.equals(field)) {
+        FieldID = f.field_id + "";
+        break;
+      }
+    }
+    for (RDataSet r : rdata) {
+      try {
+        System.out.println("iSENSE: fdata:" + r.data.getString(FieldID));
+        JSONArray jadata = new JSONArray();
+        jadata = r.data.getJSONArray(FieldID);
+        for (int i = 0; i < jadata.length(); i++) {
+          fdata.add(jadata.getString(i)); 
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    return fdata;
+  }
 
 	/**
 	 * Upload a dataset to iSENSE while logged in
@@ -557,9 +691,8 @@ public class API {
 	}
 
 	/**
-	 * Append new rows of data to the end of an existing data set ** This
-	 * currently works for horrible reasons regarding how the website handles
-	 * edit data sets ** Will fix hopefully --J
+	 * Append new rows of data to the end of an existing data set 
+	 * while logged in
 	 *
 	 * @param dataSetId
 	 *            The ID of the data set to append to
@@ -577,6 +710,55 @@ public class API {
 			try {
 				requestData.put("email", email);
 				requestData.put("password", password);
+				requestData.put("id", dataSetId);
+				requestData.put("data", newData);
+				reqResult = makeRequest(baseURL, "data_sets/"
+						+ "/append", "", "POST", requestData);
+				JSONObject jobj = new JSONObject(reqResult);
+				info.dataSetId = jobj.getInt("id");
+				if (jobj.getInt("id") != -1) {
+					info.success = true;
+				}
+				return info;
+			} catch (Exception e) {
+				try {
+					JSONObject jobj = new JSONObject(reqResult);
+					info.errorMessage = jobj.getString("msg");
+				} catch (Exception e2) {
+					try {
+						JSONObject jobj = new JSONObject(reqResult);
+						info.errorMessage = jobj.getString("error");
+					} catch (Exception e3) {
+						info.errorMessage = reqResult;
+					}
+				}
+			}
+			info.success = false;
+			info.dataSetId = -1;
+			return info;
+	}
+
+	/**
+	 * Append new rows of data to the end of an existing data set 
+	 * with a contributor key
+	 *
+	 * @param dataSetId
+	 *            The ID of the data set to append to
+	 * @param newData
+	 *            The new data to append
+	 * @param conKey
+	 * 			  The contributor key
+	 *
+	 * @return success or failure
+	 */
+	public UploadInfo appendDataSetData(int dataSetId, JSONObject newData, String conKey) {
+
+			UploadInfo info = new UploadInfo();
+			String reqResult = "";
+			JSONObject requestData = new JSONObject();
+
+			try {
+				requestData.put("contribution_key", conKey);
 				requestData.put("id", dataSetId);
 				requestData.put("data", newData);
 				reqResult = makeRequest(baseURL, "data_sets/"
@@ -750,6 +932,9 @@ public class API {
 	/**
 	 * Uploads a file to the media section of a project with a contributor key
 	 *
+   * Note: this differs from the iSenseDev repo, as it has been hotfixed to 
+   * work with uploadDataSetWithPhoto in the iSENSEPublisher component.
+   *
 	 * @param projectId
 	 *            The ID of the thing you're uploading to
 	 * @param mediaToUpload
@@ -769,8 +954,7 @@ public class API {
 		try {
 			URL url = new URL(baseURL + "/media_objects/");
 
-			HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setDoOutput(true);
 			connection.setRequestMethod("POST");
 
@@ -784,12 +968,12 @@ public class API {
 			entity.addPart("type", new StringBody(
 					(ttype == TargetType.PROJECT) ? "project" : "data_set"));
 			entity.addPart("id", new StringBody("" + projectId));
-
-			connection.setRequestProperty("Content-Type", entity
-					.getContentType().getValue());
+			
+			connection.setRequestProperty("Content-Type", entity.getContentType().getValue());
 			connection.setRequestProperty("Accept", "application/json");
-			OutputStream out = connection.getOutputStream();
-			try {
+      OutputStream out = connection.getOutputStream();
+	     
+      try {
 				entity.writeTo(out);
 			} finally {
 				out.close();
@@ -883,7 +1067,7 @@ public class API {
 
 			urlConnection.setRequestMethod(reqType);
 			urlConnection.setRequestProperty("Accept", "application/json");
-			// urlConnection.setDoOutput(true);
+			//urlConnection.setDoOutput(true);
 			if (postData != null) {
 				System.out.println("Post data: " + postData);
 				mPostData = postData.toString().getBytes();
