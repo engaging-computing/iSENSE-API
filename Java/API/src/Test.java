@@ -21,15 +21,15 @@ public class Test {
 	@BeforeClass
 	public static void OneTimeSetup() {
 		api = API.getInstance();
-//		try {
-//			String ip = InetAddress.getLocalHost().getHostAddress();
-//			if (ip.equals("129.63.16.128"))
-//				api.useDev(false);
-//			else
-//				api.setBaseUrl("http://" + ip + ":3000");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		try {
+			String ip = InetAddress.getLocalHost().getHostAddress();
+			if (ip.equals("129.63.16.128"))
+				api.useDev(false);
+			else
+				api.setBaseUrl("http://" + ip + ":3000");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@org.junit.Test
