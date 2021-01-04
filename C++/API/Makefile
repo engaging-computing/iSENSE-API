@@ -13,11 +13,11 @@ all: 	tests.out
 tests.out:	tests.o API.o
 	$(CC) tests.o API.o -o tests.out $(CFLAGS) $(Boost)
 
-tests.o: tests.cpp include/API.h include/memfile.h include/picojson.h
+tests.o: tests.cpp include/API.h
 	$(CC) -c tests.cpp $(CFLAGS)
 
 # API code
-API.o:	API.cpp include/API.h include/memfile.h include/picojson.h
+API.o:	API.cpp include/API.h
 	$(CC) -c API.cpp $(CFLAGS)
 
 clean:
